@@ -1,7 +1,7 @@
 blank_issues_enabled: false
 contact_links:
   - name: Security vulnerability
-    url: https://github.com/auditlayer/auditlayer/security/advisories/new
+    url: https://github.com/jeffry1829/AuditLayer/security/advisories/new
     about: Report a security vulnerability privately. Do not open a public issue.
   - name: Compliance / legal question
     url: mailto:legal@auditlayer.io

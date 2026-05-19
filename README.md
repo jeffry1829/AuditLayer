@@ -2,9 +2,9 @@
 
 **Tamper-evident audit logs for production AI systems. Designed to support EU AI Act Article 12 record-keeping.**
 
-[![CI](https://github.com/auditlayer/auditlayer/actions/workflows/ci.yml/badge.svg)](https://github.com/auditlayer/auditlayer/actions/workflows/ci.yml)
+[![CI](https://github.com/jeffry1829/AuditLayer/actions/workflows/ci.yml/badge.svg)](https://github.com/jeffry1829/AuditLayer/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
-[![npm](https://img.shields.io/badge/npm-%40auditlayer%2Fsdk-orange)](https://www.npmjs.com/package/@auditlayer/sdk)
+[![Status](https://img.shields.io/badge/status-alpha-orange)](#status)
 
 EU AI Act Article 12 takes effect **2 Aug 2026**. Every high-risk AI system
 (HR / credit / insurance / healthcare / education) must keep automatic,

@@ -11,7 +11,7 @@ expose customers to regulatory penalties. We take security reports seriously.
 Report privately via:
 
 - **Email**: `security@auditlayer.io` (GPG key fingerprint to be published before v1.0)
-- **GitHub Private Vulnerability Reporting**: https://github.com/auditlayer/auditlayer/security/advisories/new
+- **GitHub Private Vulnerability Reporting**: https://github.com/jeffry1829/AuditLayer/security/advisories/new
 
 Please include:
 

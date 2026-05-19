@@ -4,14 +4,14 @@
   "description": "AuditLayer CLI — query, verify, and export hash-chained audit logs. Verification works offline (no AuditLayer cloud required).",
   "license": "Apache-2.0",
   "author": "AuditLayer Contributors",
-  "homepage": "https://github.com/auditlayer/auditlayer/tree/main/packages/cli",
+  "homepage": "https://github.com/jeffry1829/AuditLayer/tree/main/packages/cli",
   "repository": {
     "type": "git",
-    "url": "https://github.com/auditlayer/auditlayer.git",
+    "url": "https://github.com/jeffry1829/AuditLayer.git",
     "directory": "packages/cli"
   },
   "bugs": {
-    "url": "https://github.com/auditlayer/auditlayer/issues"
+    "url": "https://github.com/jeffry1829/AuditLayer/issues"
   },
   "keywords": [
     "eu-ai-act",

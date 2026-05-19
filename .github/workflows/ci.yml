@@ -44,18 +44,19 @@ jobs:
         run: pnpm lint
         if: matrix.node == '20'
 
-      - name: Typecheck
-        run: pnpm typecheck
-
+      # Build first so workspace deps emit dist/ for downstream typecheck.
       - name: Build
         run: pnpm build
 
+      - name: Typecheck
+        run: pnpm typecheck
+
       - name: Test
-        run: pnpm test -- --run
+        run: pnpm test
 
       - name: Coverage
         if: matrix.node == '20'
-        run: pnpm test:coverage -- --run
+        run: pnpm test:coverage
 
       - name: Upload coverage artifact
         if: matrix.node == '20'
