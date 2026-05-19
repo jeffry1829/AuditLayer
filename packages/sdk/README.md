@@ -52,7 +52,9 @@ const anthropic = audit.wrap(new Anthropic(), {
   operatorId: 'system',
 });
 
-const result = await anthropic.messages.create({ /* … */ });
+const result = await anthropic.messages.create({
+  /* … */
+});
 ```
 
 ### Pattern 2 — wrap OpenAI SDK
@@ -67,7 +69,9 @@ const openai = audit.wrap(new OpenAI(), {
   operatorId: 'system',
 });
 
-const completion = await openai.chat.completions.create({ /* … */ });
+const completion = await openai.chat.completions.create({
+  /* … */
+});
 ```
 
 ### Pattern 3 — manual `startCall` / `endCall`

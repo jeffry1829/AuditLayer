@@ -177,12 +177,14 @@ describe('AuditLogger', () => {
 
   it('wrap() rejects unsupported clients', () => {
     const audit = makeLogger(dir);
-    expect(() => audit.wrap({} as object, {
-      caseId: 'c',
-      promptTemplateId: 'p',
-      promptTemplateVersion: '1.0',
-      operatorId: 'o',
-    })).toThrow(/neither an Anthropic nor OpenAI/);
+    expect(() =>
+      audit.wrap({} as object, {
+        caseId: 'c',
+        promptTemplateId: 'p',
+        promptTemplateVersion: '1.0',
+        operatorId: 'o',
+      }),
+    ).toThrow(/neither an Anthropic nor OpenAI/);
   });
 
   it('wrap() intercepts Anthropic messages.create()', async () => {

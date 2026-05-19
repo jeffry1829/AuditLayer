@@ -23,13 +23,13 @@ as a **data processor** subject to the Data Processing Agreement at
 
 ## 2. Categories of personal data we process
 
-| Category | Examples | Purpose | Legal basis (GDPR) |
-|---|---|---|---|
-| Identity | name, email, employer | Account creation, billing | Contract (Art. 6(1)(b)) |
+| Category  | Examples                    | Purpose                    | Legal basis (GDPR)                  |
+| --------- | --------------------------- | -------------------------- | ----------------------------------- |
+| Identity  | name, email, employer       | Account creation, billing  | Contract (Art. 6(1)(b))             |
 | Technical | IP address, browser, device | Security, abuse prevention | Legitimate interests (Art. 6(1)(f)) |
-| Usage | page views, feature use | Product improvement | Legitimate interests |
-| Payment | last 4 digits, country | Billing | Contract |
-| Support | message content | Customer support | Contract |
+| Usage     | page views, feature use     | Product improvement        | Legitimate interests                |
+| Payment   | last 4 digits, country      | Billing                    | Contract                            |
+| Support   | message content             | Customer support           | Contract                            |
 
 We do **not** sell personal data and do not engage in cross-context
 behavioral advertising.
@@ -49,12 +49,12 @@ Contractual Clauses (2021/914) and the UK IDTA where applicable.
 
 ## 5. Retention
 
-| Data | Retention |
-|---|---|
-| Account data | Lifetime of account + 12 months |
-| Billing records | 7 years (tax / accounting) |
-| Support tickets | 24 months |
-| Web logs | 90 days |
+| Data              | Retention                                                      |
+| ----------------- | -------------------------------------------------------------- |
+| Account data      | Lifetime of account + 12 months                                |
+| Billing records   | 7 years (tax / accounting)                                     |
+| Support tickets   | 24 months                                                      |
+| Web logs          | 90 days                                                        |
 | Hosted audit logs | Per Customer's configured policy (Software default: ≥180 days) |
 
 ## 6. Your rights (GDPR, UK GDPR)
@@ -74,7 +74,7 @@ For audit-log content recorded by the Software, exercise these rights with
 the **Customer** that operates the AI system, not AuditLayer; AuditLayer
 will forward applicable requests under the DPA.
 
-## 7. Article 12 × GDPR interaction *(spec §1.5)*
+## 7. Article 12 × GDPR interaction _(spec §1.5)_
 
 The AuditLayer Software is designed to support the simultaneous obligations
 of EU AI Act Article 12 (retention of audit records ≥ 6 months) and GDPR

@@ -39,7 +39,9 @@ const anthropic = audit.wrap(new Anthropic(), {
   operatorId: 'system',
 });
 
-await anthropic.messages.create({ /* … */ });
+await anthropic.messages.create({
+  /* … */
+});
 ```
 
 Verify the chain at any time (offline — no AuditLayer cloud required):
@@ -52,14 +54,14 @@ npx @auditlayer/cli verify --storage-dir ./audit-logs --system-id hireflow-resum
 
 ## What you get
 
-| | |
-|---|---|
-| **Schema** | One JSON record per AI decision. Fields map to Article 12(2)(a)–(c) + 12(3)(a)–(d). |
-| **Hash chain** | SHA-256 + RFC 8785 (JCS) canonicalization. Pluggable KMS-backed signer. |
-| **Storage** | Customer-owned. Local filesystem or S3 (with Object Lock + SSE-KMS). |
-| **PII** | Regex-based redaction with pseudonymization. Token store is GDPR-deletable. |
-| **CLI** | `init` / `query` / `verify` / `export`. Verification works fully offline. |
-| **License** | Apache-2.0. Fork-and-self-host forever. |
+|                |                                                                                     |
+| -------------- | ----------------------------------------------------------------------------------- |
+| **Schema**     | One JSON record per AI decision. Fields map to Article 12(2)(a)–(c) + 12(3)(a)–(d). |
+| **Hash chain** | SHA-256 + RFC 8785 (JCS) canonicalization. Pluggable KMS-backed signer.             |
+| **Storage**    | Customer-owned. Local filesystem or S3 (with Object Lock + SSE-KMS).                |
+| **PII**        | Regex-based redaction with pseudonymization. Token store is GDPR-deletable.         |
+| **CLI**        | `init` / `query` / `verify` / `export`. Verification works fully offline.           |
+| **License**    | Apache-2.0. Fork-and-self-host forever.                                             |
 
 Three runnable examples included: [HR resume screening](./examples/resume-screening),
 [fintech credit decision](./examples/credit-decision),

@@ -14,14 +14,14 @@ Service.
 
 ## 1. Subject matter, duration, nature and purpose
 
-| Item | Description |
-|---|---|
-| Subject matter | Provision of audit-log infrastructure for Controller's AI systems |
-| Duration | For the duration of the underlying Terms of Service |
-| Nature | Storage, retrieval, hash-chain verification, retention enforcement, GDPR-compatible pseudonymization |
-| Purpose | Support Controller's compliance with EU AI Act Article 12 and related obligations |
+| Item                     | Description                                                                                                     |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------- |
+| Subject matter           | Provision of audit-log infrastructure for Controller's AI systems                                               |
+| Duration                 | For the duration of the underlying Terms of Service                                                             |
+| Nature                   | Storage, retrieval, hash-chain verification, retention enforcement, GDPR-compatible pseudonymization            |
+| Purpose                  | Support Controller's compliance with EU AI Act Article 12 and related obligations                               |
 | Personal Data categories | As determined by Controller; typically transactional fingerprints, pseudonymized identifiers, decision metadata |
-| Data subjects | As determined by Controller; typically end users of Controller's AI systems |
+| Data subjects            | As determined by Controller; typically end users of Controller's AI systems                                     |
 
 ## 2. Roles
 
@@ -35,30 +35,30 @@ Member State, or other applicable law.
 Processor shall:
 
 (a) process Personal Data only on Controller's documented instructions
-    (including those given through Service configuration);
+(including those given through Service configuration);
 
 (b) ensure that persons authorised to process the Personal Data are bound
-    by confidentiality obligations;
+by confidentiality obligations;
 
 (c) implement appropriate technical and organisational measures (see
-    Annex II);
+Annex II);
 
 (d) respect the conditions for engaging Sub-processors (Section 5);
 
 (e) assist Controller, where reasonably possible, in responding to Data
-    Subject requests;
+Subject requests;
 
 (f) assist Controller with security, breach notification, DPIA, and
-    consultation obligations (Articles 32–36 GDPR);
+consultation obligations (Articles 32–36 GDPR);
 
 (g) at Controller's choice, delete or return Personal Data at the end of
-    the provision of services, subject to the retention obligations
-    described in Annex III (Article 12 × GDPR resolution);
+the provision of services, subject to the retention obligations
+described in Annex III (Article 12 × GDPR resolution);
 
 (h) make available all information necessary to demonstrate compliance and
-    allow for and contribute to audits, including inspections, conducted
-    by Controller or another auditor mandated by Controller, with
-    reasonable notice and during business hours.
+allow for and contribute to audits, including inspections, conducted
+by Controller or another auditor mandated by Controller, with
+reasonable notice and during business hours.
 
 ## 4. Security measures
 
@@ -73,10 +73,10 @@ Controller authorises Processor to engage the Sub-processors listed at
 following:
 
 (a) Processor will provide ≥ 30 days' notice before adding or replacing
-    Sub-processors and Controller may object on reasonable grounds;
+Sub-processors and Controller may object on reasonable grounds;
 
 (b) Processor will impose data protection obligations on Sub-processors
-    equivalent to those in this DPA;
+equivalent to those in this DPA;
 
 (c) Processor remains liable for Sub-processor performance.
 

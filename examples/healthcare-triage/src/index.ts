@@ -63,10 +63,20 @@ interface TriageOutput {
 function triage(p: Patient): TriageOutput {
   const hasRed = p.symptoms.some((s) => /chest pain|shortness of breath|stroke/.test(s));
   if (hasRed && p.vitals.spo2 < 94) {
-    return { triageLevel: 1, recommendation: 'immediate', confidence: 0.92, reasonCodes: ['RED_FLAG_SYMPTOM', 'LOW_SPO2'] };
+    return {
+      triageLevel: 1,
+      recommendation: 'immediate',
+      confidence: 0.92,
+      reasonCodes: ['RED_FLAG_SYMPTOM', 'LOW_SPO2'],
+    };
   }
   if (hasRed) {
-    return { triageLevel: 2, recommendation: 'urgent', confidence: 0.78, reasonCodes: ['RED_FLAG_SYMPTOM'] };
+    return {
+      triageLevel: 2,
+      recommendation: 'urgent',
+      confidence: 0.78,
+      reasonCodes: ['RED_FLAG_SYMPTOM'],
+    };
   }
   return { triageLevel: 4, recommendation: 'routine', confidence: 0.6, reasonCodes: ['ROUTINE'] };
 }

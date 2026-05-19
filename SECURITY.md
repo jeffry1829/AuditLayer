@@ -22,13 +22,13 @@ Please include:
 
 ## What to expect
 
-| Step | Target |
-|---|---|
-| Acknowledgement of report | within 72 hours |
-| Triage and severity assessment | within 7 days |
-| Customer notification (if customer-affecting) | within 14 days of confirmation |
-| Public disclosure (coordinated) | after fix is shipped and customers are notified |
-| Post-mortem | within 7 days of disclosure |
+| Step                                          | Target                                          |
+| --------------------------------------------- | ----------------------------------------------- |
+| Acknowledgement of report                     | within 72 hours                                 |
+| Triage and severity assessment                | within 7 days                                   |
+| Customer notification (if customer-affecting) | within 14 days of confirmation                  |
+| Public disclosure (coordinated)               | after fix is shipped and customers are notified |
+| Post-mortem                                   | within 7 days of disclosure                     |
 
 These targets follow the incident response posture described in spec §13.6(D).
 

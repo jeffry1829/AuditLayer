@@ -53,11 +53,10 @@ export interface InitOptions {
 export async function initCommand(opts: InitOptions, io: CommandIO = defaultIO): Promise<number> {
   const path = resolve(io.cwd, opts.output ?? 'auditlayer.config.json');
   try {
-    await writeFile(
-      path,
-      JSON.stringify(DEFAULT_INIT_CONFIG, null, 2) + '\n',
-      { encoding: 'utf8', flag: opts.force ? 'w' : 'wx' },
-    );
+    await writeFile(path, JSON.stringify(DEFAULT_INIT_CONFIG, null, 2) + '\n', {
+      encoding: 'utf8',
+      flag: opts.force ? 'w' : 'wx',
+    });
   } catch (err) {
     if ((err as NodeJS.ErrnoException).code === 'EEXIST') {
       io.stderr.write(`Refusing to overwrite ${path}. Use --force to overwrite.\n`);

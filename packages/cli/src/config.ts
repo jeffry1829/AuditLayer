@@ -22,10 +22,7 @@ export interface CliConfig {
   storage: CliConfigStorage;
 }
 
-export const DEFAULT_CONFIG_FILES = [
-  'auditlayer.config.json',
-  '.auditlayer.json',
-] as const;
+export const DEFAULT_CONFIG_FILES = ['auditlayer.config.json', '.auditlayer.json'] as const;
 
 export async function loadConfig(explicitPath?: string): Promise<CliConfig | null> {
   const candidates = explicitPath ? [explicitPath] : [...DEFAULT_CONFIG_FILES];
@@ -63,15 +60,10 @@ export interface ConfigOverrides {
   s3Prefix?: string;
 }
 
-export function resolveConfig(
-  config: CliConfig | null,
-  overrides: ConfigOverrides,
-): CliConfig {
+export function resolveConfig(config: CliConfig | null, overrides: ConfigOverrides): CliConfig {
   const systemId = overrides.systemId ?? config?.systemId;
   if (!systemId) {
-    throw new Error(
-      'systemId is required. Set it in auditlayer.config.json or pass --system-id.',
-    );
+    throw new Error('systemId is required. Set it in auditlayer.config.json or pass --system-id.');
   }
 
   let storage: CliConfigStorage | undefined = config?.storage;

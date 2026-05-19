@@ -6,24 +6,24 @@
 
 ## Severity definitions
 
-| Severity | Definition | Examples |
-|---|---|---|
-| **SEV-1** | Active integrity compromise OR data loss | Hash chain forgery exploit; signing key compromise; multi-Customer data loss |
-| **SEV-2** | Service degradation OR single-Customer data exposure | Hosted-service downtime; PII leak in one tenant; CLI verify false negative |
-| **SEV-3** | Bug or limitation requiring patch but no immediate risk | Schema edge case; CLI UX bug |
-| **SEV-4** | Informational | Roadmap-level findings |
+| Severity  | Definition                                              | Examples                                                                     |
+| --------- | ------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| **SEV-1** | Active integrity compromise OR data loss                | Hash chain forgery exploit; signing key compromise; multi-Customer data loss |
+| **SEV-2** | Service degradation OR single-Customer data exposure    | Hosted-service downtime; PII leak in one tenant; CLI verify false negative   |
+| **SEV-3** | Bug or limitation requiring patch but no immediate risk | Schema edge case; CLI UX bug                                                 |
+| **SEV-4** | Informational                                           | Roadmap-level findings                                                       |
 
 ## Response timeline
 
-| Step | Owner | Target | Notes |
-|---|---|---|---|
-| Detection | on-call / customer / researcher | — | Sources: SECURITY.md inbox, Sentry, Statuspage, customer report |
-| Initial assessment | on-call engineer | ≤ 1 hour from detection | Confirm scope; assign severity |
-| Customer notification (affected) | engineering lead | ≤ 4 hours for SEV-1; ≤ 24 hours for SEV-2 | Email + status page |
-| Public status page update | engineering lead | ≤ 24 hours for SEV-1/2 | `status.auditlayer.io` |
-| Mitigation deployed | engineering lead | ≤ 24 hours for SEV-1; ≤ 72 hours for SEV-2 | Workaround acceptable |
-| Permanent fix shipped | engineering lead | ≤ 14 days for SEV-1; ≤ 30 days for SEV-2 | Plus regression test |
-| Post-mortem published | engineering lead | ≤ 7 days after fix | Public for SEV-1/2 unless customer requests otherwise |
+| Step                             | Owner                           | Target                                     | Notes                                                           |
+| -------------------------------- | ------------------------------- | ------------------------------------------ | --------------------------------------------------------------- |
+| Detection                        | on-call / customer / researcher | —                                          | Sources: SECURITY.md inbox, Sentry, Statuspage, customer report |
+| Initial assessment               | on-call engineer                | ≤ 1 hour from detection                    | Confirm scope; assign severity                                  |
+| Customer notification (affected) | engineering lead                | ≤ 4 hours for SEV-1; ≤ 24 hours for SEV-2  | Email + status page                                             |
+| Public status page update        | engineering lead                | ≤ 24 hours for SEV-1/2                     | `status.auditlayer.io`                                          |
+| Mitigation deployed              | engineering lead                | ≤ 24 hours for SEV-1; ≤ 72 hours for SEV-2 | Workaround acceptable                                           |
+| Permanent fix shipped            | engineering lead                | ≤ 14 days for SEV-1; ≤ 30 days for SEV-2   | Plus regression test                                            |
+| Post-mortem published            | engineering lead                | ≤ 7 days after fix                         | Public for SEV-1/2 unless customer requests otherwise           |
 
 ## Communication templates
 

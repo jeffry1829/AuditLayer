@@ -64,10 +64,7 @@ export class LocalStorageBackend implements StorageBackend {
     }
   }
 
-  private pathFor(
-    systemId: string,
-    when: Date,
-  ): { fullPath: string; dirSegments: string[] } {
+  private pathFor(systemId: string, when: Date): { fullPath: string; dirSegments: string[] } {
     const yyyy = when.getUTCFullYear().toString();
     const mm = String(when.getUTCMonth() + 1).padStart(2, '0');
     const dd = String(when.getUTCDate()).padStart(2, '0');

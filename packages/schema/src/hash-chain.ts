@@ -24,9 +24,7 @@ export const GENESIS_PREVIOUS_HASH = createHash('sha256')
  * field changes the entry hash; changing the previous entry's hash changes
  * the chain link.
  */
-export function computeEntryHash(
-  entry: Omit<AuditLogEntry, 'entryHash' | 'signature'>,
-): string {
+export function computeEntryHash(entry: Omit<AuditLogEntry, 'entryHash' | 'signature'>): string {
   const canonicalBytes = canonicalizeForHash(entry);
   return createHash(HASH_ALGORITHM).update(canonicalBytes).digest('hex');
 }

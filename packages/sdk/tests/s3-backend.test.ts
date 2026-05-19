@@ -57,7 +57,10 @@ class FakeS3Client {
   }
 }
 
-function makeBackend(prefix?: string, listResult = { Contents: [{ Key: 'sys/2026/05/19/00-call-1.json' }] }) {
+function makeBackend(
+  prefix?: string,
+  listResult = { Contents: [{ Key: 'sys/2026/05/19/00-call-1.json' }] },
+) {
   const client = new FakeS3Client(listResult);
   const backend = new S3StorageBackend(
     { type: 's3', bucket: 'b', region: 'eu-west-1', prefix },

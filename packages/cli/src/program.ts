@@ -35,7 +35,10 @@ export function buildProgram(runOpts: RunOptions = {}): Command {
     .option('--output <path>', 'output path', 'auditlayer.config.json')
     .option('--force', 'overwrite existing file', false)
     .action(async (opts: { output: string; force: boolean }) => {
-      const code = await initCommand({ output: opts.output, force: opts.force }, { stdout: process.stdout, stderr: process.stderr, cwd });
+      const code = await initCommand(
+        { output: opts.output, force: opts.force },
+        { stdout: process.stdout, stderr: process.stderr, cwd },
+      );
       if (code !== 0) process.exitCode = code;
     });
 
@@ -48,7 +51,11 @@ export function buildProgram(runOpts: RunOptions = {}): Command {
     .action(async (opts: { caseId: string; from?: string; to?: string }) => {
       const { json, ...rest } = collectGlobals(program.opts());
       const config = resolveConfig(await loadConfig(rest.config), rest);
-      const code = await queryCommand(config, { ...opts, json }, { stdout: process.stdout, stderr: process.stderr, cwd });
+      const code = await queryCommand(
+        config,
+        { ...opts, json },
+        { stdout: process.stdout, stderr: process.stderr, cwd },
+      );
       if (code !== 0) process.exitCode = code;
     });
 
@@ -61,7 +68,11 @@ export function buildProgram(runOpts: RunOptions = {}): Command {
     .action(async (opts: { from?: string; to?: string; caseId?: string }) => {
       const { json, ...rest } = collectGlobals(program.opts());
       const config = resolveConfig(await loadConfig(rest.config), rest);
-      const code = await verifyCommand(config, { ...opts, json }, { stdout: process.stdout, stderr: process.stderr, cwd });
+      const code = await verifyCommand(
+        config,
+        { ...opts, json },
+        { stdout: process.stdout, stderr: process.stderr, cwd },
+      );
       if (code !== 0) process.exitCode = code;
     });
 
@@ -76,7 +87,11 @@ export function buildProgram(runOpts: RunOptions = {}): Command {
       const { json: _json, ...rest } = collectGlobals(program.opts());
       void _json;
       const config = resolveConfig(await loadConfig(rest.config), rest);
-      const code = await exportCommand(config, opts, { stdout: process.stdout, stderr: process.stderr, cwd });
+      const code = await exportCommand(config, opts, {
+        stdout: process.stdout,
+        stderr: process.stderr,
+        cwd,
+      });
       if (code !== 0) process.exitCode = code;
     });
 

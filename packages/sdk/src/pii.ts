@@ -47,7 +47,10 @@ export class InMemoryPiiTokenStore implements PiiTokenStore {
   // forward key -> token
   private readonly forward = new Map<string, string>();
   // token -> { caseId, fieldKey, value } so eraseCase reverses precisely.
-  private readonly reverse = new Map<string, { caseId: string; forwardKey: string; value: string }>();
+  private readonly reverse = new Map<
+    string,
+    { caseId: string; forwardKey: string; value: string }
+  >();
   // caseId -> set of tokens
   private readonly caseIndex = new Map<string, Set<string>>();
 
@@ -147,9 +150,9 @@ export class SqlitePiiTokenStore implements PiiTokenStore {
   }
 
   reveal(token: string): string | null {
-    const row = this.db
-      .prepare('SELECT value FROM pii_tokens WHERE token = ?')
-      .get(token) as { value: string } | undefined;
+    const row = this.db.prepare('SELECT value FROM pii_tokens WHERE token = ?').get(token) as
+      | { value: string }
+      | undefined;
     return row ? row.value : null;
   }
 

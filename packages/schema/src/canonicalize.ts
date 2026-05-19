@@ -62,9 +62,7 @@ function serialize(value: unknown, seen: WeakSet<object>): string {
     case 'symbol':
       // Unreachable at object level (filtered upstream) and arrays handle
       // undefined explicitly. Throw to make programmer errors loud.
-      throw new TypeError(
-        `canonicalize: value of type ${typeof value} is not representable`,
-      );
+      throw new TypeError(`canonicalize: value of type ${typeof value} is not representable`);
   }
 
   if (Array.isArray(value)) {

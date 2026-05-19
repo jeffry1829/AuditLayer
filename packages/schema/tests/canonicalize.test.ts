@@ -78,7 +78,7 @@ describe('canonicalize (RFC 8785 JCS)', () => {
   });
 
   it('keeps deterministic output for unicode keys', () => {
-    const v = { 'é': 1, 'a': 2 };
+    const v = { é: 1, a: 2 };
     expect(canonicalize(v)).toBe('{"a":2,"é":1}');
   });
 });

@@ -102,7 +102,9 @@ async function main() {
   }
   await audit.close();
   console.log(`\nAudit logs written to: ${auditDir}`);
-  console.log(`Run: npx @auditlayer/cli verify --system-id resume-screener-example --storage-dir ${auditDir}`);
+  console.log(
+    `Run: npx @auditlayer/cli verify --system-id resume-screener-example --storage-dir ${auditDir}`,
+  );
 }
 
 function computeMockScore(text: string): number {

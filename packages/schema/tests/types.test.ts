@@ -47,7 +47,9 @@ describe('AuditLogEntryInputSchema', () => {
   });
 
   it('rejects a non-ISO timestamp', () => {
-    expect(() => AuditLogEntryInputSchema.parse({ ...baseInput(), startedAt: 'yesterday' })).toThrow();
+    expect(() =>
+      AuditLogEntryInputSchema.parse({ ...baseInput(), startedAt: 'yesterday' }),
+    ).toThrow();
   });
 
   it('rejects an unknown schemaVersion', () => {

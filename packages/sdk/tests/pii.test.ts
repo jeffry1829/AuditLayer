@@ -1,11 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import {
-  detectPii,
-  hashString,
-  InMemoryPiiTokenStore,
-  PiiRedactor,
-} from '../src/pii.js';
+import { detectPii, hashString, InMemoryPiiTokenStore, PiiRedactor } from '../src/pii.js';
 
 describe('detectPii', () => {
   it('detects emails when enabled', () => {
@@ -72,9 +67,9 @@ describe('PiiRedactor', () => {
   });
 
   it('refuses pseudonymize without a token store', () => {
-    expect(
-      () => new PiiRedactor({ enabled: true, strategy: 'pseudonymize' }, null),
-    ).toThrow(/token store/);
+    expect(() => new PiiRedactor({ enabled: true, strategy: 'pseudonymize' }, null)).toThrow(
+      /token store/,
+    );
   });
 
   it('pseudonymizes detected PII into stable tokens', async () => {

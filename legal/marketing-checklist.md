@@ -16,7 +16,7 @@
 - [ ] "Replaces your compliance officer"
 - [ ] "Eliminates regulatory risk"
 - [ ] "Anonymizes PII" (we pseudonymize; anonymization is a different and
-  stronger claim under GDPR)
+      stronger claim under GDPR)
 
 ## Phrases that are SAFE
 
@@ -38,14 +38,14 @@
 - [ ] All performance numbers cited with the test methodology in a footnote
 - [ ] All deadline / penalty references cite the regulation text
 
-## SLA-specific language *(spec §13.4)*
+## SLA-specific language _(spec §13.4)_
 
 - [ ] **Do not promise**: "audit logs are written within 5 seconds"
-  **Do promise**: "audit logs are recorded asynchronously and typically
-  available within minutes"
+      **Do promise**: "audit logs are recorded asynchronously and typically
+      available within minutes"
 - [ ] **Do not promise**: "99.99% uptime"
-  **Do promise**: "monthly availability target of 99.5%; service credits
-  available if missed"
+      **Do promise**: "monthly availability target of 99.5%; service credits
+      available if missed"
 
 ## Review trail
 

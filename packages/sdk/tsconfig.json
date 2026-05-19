@@ -6,9 +6,7 @@
     "composite": true,
     "tsBuildInfoFile": "dist/.tsbuildinfo"
   },
-  "references": [
-    { "path": "../schema" }
-  ],
+  "references": [{ "path": "../schema" }],
   "include": ["src/**/*.ts"],
   "exclude": ["dist", "tests", "**/*.test.ts"]
 }

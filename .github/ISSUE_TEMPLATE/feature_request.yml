@@ -1,7 +1,7 @@
 name: Feature request
 description: Suggest a new capability for AuditLayer
-title: "[feat] "
-labels: ["enhancement", "needs-triage"]
+title: '[feat] '
+labels: ['enhancement', 'needs-triage']
 body:
   - type: textarea
     id: problem
@@ -25,12 +25,12 @@ body:
     attributes:
       label: Affected surface
       options:
-        - "@auditlayer/sdk"
-        - "@auditlayer/cli"
-        - "@auditlayer/schema"
-        - "docs"
-        - "examples"
-        - "other"
+        - '@auditlayer/sdk'
+        - '@auditlayer/cli'
+        - '@auditlayer/schema'
+        - 'docs'
+        - 'examples'
+        - 'other'
     validations:
       required: true
   - type: checkboxes

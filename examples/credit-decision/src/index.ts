@@ -29,9 +29,30 @@ interface Applicant {
 }
 
 const applicants: Applicant[] = [
-  { applicationId: 'app-001', customerId: 'cust-1001', requestedAmount: 5000, income: 60000, existingDebt: 2000, creditScore: 720 },
-  { applicationId: 'app-002', customerId: 'cust-1002', requestedAmount: 25000, income: 38000, existingDebt: 14000, creditScore: 612 },
-  { applicationId: 'app-003', customerId: 'cust-1003', requestedAmount: 12000, income: 90000, existingDebt: 1000, creditScore: 805 },
+  {
+    applicationId: 'app-001',
+    customerId: 'cust-1001',
+    requestedAmount: 5000,
+    income: 60000,
+    existingDebt: 2000,
+    creditScore: 720,
+  },
+  {
+    applicationId: 'app-002',
+    customerId: 'cust-1002',
+    requestedAmount: 25000,
+    income: 38000,
+    existingDebt: 14000,
+    creditScore: 612,
+  },
+  {
+    applicationId: 'app-003',
+    customerId: 'cust-1003',
+    requestedAmount: 12000,
+    income: 90000,
+    existingDebt: 1000,
+    creditScore: 805,
+  },
 ];
 
 interface CreditOutput {

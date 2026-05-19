@@ -1,7 +1,7 @@
 name: Bug report
 description: Report a bug in AuditLayer
-title: "[bug] "
-labels: ["bug", "needs-triage"]
+title: '[bug] '
+labels: ['bug', 'needs-triage']
 body:
   - type: markdown
     attributes:
@@ -15,14 +15,14 @@ body:
     id: version
     attributes:
       label: AuditLayer version
-      placeholder: "@auditlayer/sdk 0.1.0 / @auditlayer/cli 0.1.0"
+      placeholder: '@auditlayer/sdk 0.1.0 / @auditlayer/cli 0.1.0'
     validations:
       required: true
   - type: input
     id: env
     attributes:
       label: Environment
-      placeholder: "Node 20.x / macOS 14 / Linux x86_64"
+      placeholder: 'Node 20.x / macOS 14 / Linux x86_64'
     validations:
       required: true
   - type: textarea

@@ -10,12 +10,7 @@ import {
 import { LocalStorageBackend } from './backends/local.js';
 import { S3StorageBackend } from './backends/s3.js';
 import type { StorageBackend } from './backends/types.js';
-import type {
-  AuditLoggerConfig,
-  EndCallInput,
-  StartCallInput,
-  WrapContext,
-} from './config.js';
+import type { AuditLoggerConfig, EndCallInput, StartCallInput, WrapContext } from './config.js';
 import { InMemoryPiiTokenStore, PiiRedactor, SqlitePiiTokenStore } from './pii.js';
 import type { PiiTokenStore } from './pii.js';
 import { createSigner, type Signer } from './signing.js';
@@ -248,9 +243,11 @@ function detectProvider(client: object): 'anthropic' | 'openai' | null {
   // OpenAI v4 and Anthropic SDKs are nearly disjoint shapes; we look for the
   // specific method we are about to wrap.
   const openaiCreate =
-    typeof ((c['chat'] as Record<string, unknown> | undefined)?.['completions'] as
-      | Record<string, unknown>
-      | undefined)?.['create'] === 'function';
+    typeof (
+      (c['chat'] as Record<string, unknown> | undefined)?.['completions'] as
+        | Record<string, unknown>
+        | undefined
+    )?.['create'] === 'function';
   if (openaiCreate) return 'openai';
 
   const anthropicCreate =
@@ -260,11 +257,7 @@ function detectProvider(client: object): 'anthropic' | 'openai' | null {
   return null;
 }
 
-function wrapAnthropic<T extends object>(
-  audit: AuditLogger,
-  client: T,
-  context: WrapContext,
-): T {
+function wrapAnthropic<T extends object>(audit: AuditLogger, client: T, context: WrapContext): T {
   type CreateFn = (...args: unknown[]) => Promise<unknown>;
   const messages = (client as unknown as { messages: { create: CreateFn } }).messages;
   const originalCreate = messages.create.bind(messages);
@@ -358,7 +351,13 @@ function extractAnthropicConfig(params: Record<string, unknown>): Record<string,
 
 function extractOpenAiConfig(params: Record<string, unknown>): Record<string, unknown> {
   const out: Record<string, unknown> = {};
-  for (const key of ['temperature', 'top_p', 'max_tokens', 'frequency_penalty', 'presence_penalty']) {
+  for (const key of [
+    'temperature',
+    'top_p',
+    'max_tokens',
+    'frequency_penalty',
+    'presence_penalty',
+  ]) {
     if (key in params) out[key] = params[key];
   }
   return out;
