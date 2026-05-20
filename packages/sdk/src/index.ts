@@ -50,6 +50,7 @@ export {
   AuditLayerSignerError,
   AuditLayerProviderError,
   AuditLayerPiiError,
+  AuditLayerLifecycleError,
   ERROR_CODES,
   type AuditLayerErrorCode,
 } from './errors.js';

@@ -1,0 +1,10 @@
+{
+  "name": "explicit-null-vs-absent",
+  "description": "Explicit null appears in the canonical form; absent field is dropped. Pins the asymmetry callers depend on for optional-field semantics.",
+  "input": {
+    "nullField": null,
+    "present": true
+  },
+  "canonical": "{\"nullField\":null,\"present\":true}",
+  "sha256": "02d36607ca605a2d96bd821db0d3bf17a8483ce4a559e2c4adf8ef5504f50bd8"
+}

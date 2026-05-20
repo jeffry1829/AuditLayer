@@ -11,7 +11,12 @@ import { LocalStorageBackend } from './backends/local.js';
 import { S3StorageBackend } from './backends/s3.js';
 import type { StorageBackend } from './backends/types.js';
 import type { AuditLoggerConfig, EndCallInput, StartCallInput, WrapContext } from './config.js';
-import { AuditLayerConfigError, AuditLayerSchemaError, ERROR_CODES } from './errors.js';
+import {
+  AuditLayerConfigError,
+  AuditLayerLifecycleError,
+  AuditLayerSchemaError,
+  ERROR_CODES,
+} from './errors.js';
 import { InMemoryPiiTokenStore, PiiRedactor, SqlitePiiTokenStore } from './pii.js';
 import type { PiiTokenStore } from './pii.js';
 import { wrapClient } from './providers/registry.js';
@@ -107,7 +112,7 @@ export class AuditLogger {
   async endCall(callId: string, end: EndCallInput): Promise<AuditLogEntry> {
     const pending = this.pending.get(callId);
     if (!pending) {
-      throw new AuditLayerConfigError(
+      throw new AuditLayerLifecycleError(
         ERROR_CODES.LOGGER_CALL_NOT_PENDING,
         `endCall: callId ${callId} is not in the pending set (already finalised or never started).`,
         { callId },

@@ -1,0 +1,10 @@
+{
+  "name": "unicode-nfc-vs-nfd",
+  "description": "Pins as-given Unicode behavior: NFC-composed (U+00E9) and NFD-decomposed (U+0065 U+0301) representations of the same logical character canonicalize to different byte sequences. Callers must NFC-normalize at write time.",
+  "input": {
+    "nfc": "café",
+    "nfd": "café"
+  },
+  "canonical": "{\"nfc\":\"café\",\"nfd\":\"café\"}",
+  "sha256": "cc673dfe566ccf77bd1d7472865fdbd6e97e0f0b1976615dbc4af1a4037cabfc"
+}

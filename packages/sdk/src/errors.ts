@@ -61,3 +61,5 @@ export class AuditLayerSchemaError extends AuditLayerError {}
 export class AuditLayerSignerError extends AuditLayerError {}
 export class AuditLayerProviderError extends AuditLayerError {}
 export class AuditLayerPiiError extends AuditLayerError {}
+/** Logger lifecycle / state-machine violations (e.g. endCall on a finalized callId). */
+export class AuditLayerLifecycleError extends AuditLayerError {}

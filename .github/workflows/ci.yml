@@ -130,7 +130,9 @@ jobs:
           python-version: '3.12'
 
       - name: Install Node deps
-        run: pnpm install --frozen-lockfile
+        # --ignore-scripts skips `better-sqlite3`'s node-gyp postinstall; the
+        # conformance runner only needs `@auditlayer/schema`, no native deps.
+        run: pnpm install --frozen-lockfile --ignore-scripts
 
       - name: Build schema
         run: pnpm --filter='./packages/schema' build
