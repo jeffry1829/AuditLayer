@@ -1,4 +1,4 @@
-"""OpenAI provider adapter (sync wrap_openai)."""
+"""Async OpenAI provider adapter (wrap_openai_async)."""
 
 from __future__ import annotations
 
@@ -6,16 +6,7 @@ import inspect
 from typing import Any
 
 from .base import PROVIDER_ERROR_RISK_FLAG, ProviderHostLogger, WrapContext
-
-OPENAI_CONFIG_KEYS: tuple[str, ...] = (
-    "temperature",
-    "top_p",
-    "max_tokens",
-    "frequency_penalty",
-    "presence_penalty",
-)
-
-OPENAI_OUTPUT_KEYS: tuple[str, ...] = ("choices", "usage", "model", "id")
+from .openai import OPENAI_CONFIG_KEYS, OPENAI_OUTPUT_KEYS
 
 
 def _pick_keys(params: dict[str, Any], keys: tuple[str, ...]) -> dict[str, Any]:
@@ -28,7 +19,9 @@ def _extract_output(response: Any, keys: tuple[str, ...]) -> Any:
     return response
 
 
-class OpenAiAdapter:
+class AsyncOpenAiAdapter:
+    """Detects ``AsyncOpenAI``-shaped clients (``chat.completions.create`` is awaitable)."""
+
     provider_id = "openai"
 
     def detect(self, client: Any) -> bool:
@@ -41,13 +34,13 @@ class OpenAiAdapter:
         create = getattr(completions, "create", None)
         if not callable(create):
             return False
-        return not inspect.iscoroutinefunction(create)
+        return inspect.iscoroutinefunction(create)
 
     def wrap(self, audit: ProviderHostLogger, client: Any, context: WrapContext) -> None:
         completions = client.chat.completions
         original_create = completions.create
 
-        def wrapped_create(*args: Any, **kwargs: Any) -> Any:
+        async def wrapped_create(*args: Any, **kwargs: Any) -> Any:
             params: dict[str, Any] = dict(kwargs)
             if args:
                 first = args[0]
@@ -68,7 +61,7 @@ class OpenAiAdapter:
                 input={"messages": params.get("messages")},
             )
             try:
-                response = original_create(*args, **kwargs)
+                response = await original_create(*args, **kwargs)
                 output = _extract_output(response, OPENAI_OUTPUT_KEYS)
                 audit.end_call(call_id, output=output, output_decision=output)
                 return response
@@ -84,4 +77,4 @@ class OpenAiAdapter:
         completions.create = wrapped_create
 
 
-openai_adapter = OpenAiAdapter()
+async_openai_adapter = AsyncOpenAiAdapter()

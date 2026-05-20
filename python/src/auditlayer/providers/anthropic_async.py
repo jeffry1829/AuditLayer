@@ -1,21 +1,16 @@
-"""OpenAI provider adapter (sync wrap_openai)."""
+"""Async Anthropic provider adapter (wrap_anthropic_async)."""
 
 from __future__ import annotations
 
 import inspect
 from typing import Any
 
-from .base import PROVIDER_ERROR_RISK_FLAG, ProviderHostLogger, WrapContext
-
-OPENAI_CONFIG_KEYS: tuple[str, ...] = (
-    "temperature",
-    "top_p",
-    "max_tokens",
-    "frequency_penalty",
-    "presence_penalty",
+from .anthropic import (
+    ANTHROPIC_CONFIG_KEYS,
+    ANTHROPIC_OUTPUT_KEYS,
+    derive_anthropic_model_version,
 )
-
-OPENAI_OUTPUT_KEYS: tuple[str, ...] = ("choices", "usage", "model", "id")
+from .base import PROVIDER_ERROR_RISK_FLAG, ProviderHostLogger, WrapContext
 
 
 def _pick_keys(params: dict[str, Any], keys: tuple[str, ...]) -> dict[str, Any]:
@@ -28,26 +23,25 @@ def _extract_output(response: Any, keys: tuple[str, ...]) -> Any:
     return response
 
 
-class OpenAiAdapter:
-    provider_id = "openai"
+class AsyncAnthropicAdapter:
+    """Detects ``AsyncAnthropic``-shaped clients (``messages.create`` is awaitable)."""
+
+    provider_id = "anthropic"
 
     def detect(self, client: Any) -> bool:
-        chat = getattr(client, "chat", None)
-        if chat is None:
+        messages = getattr(client, "messages", None)
+        if messages is None:
             return False
-        completions = getattr(chat, "completions", None)
-        if completions is None:
-            return False
-        create = getattr(completions, "create", None)
+        create = getattr(messages, "create", None)
         if not callable(create):
             return False
-        return not inspect.iscoroutinefunction(create)
+        return inspect.iscoroutinefunction(create)
 
     def wrap(self, audit: ProviderHostLogger, client: Any, context: WrapContext) -> None:
-        completions = client.chat.completions
-        original_create = completions.create
+        messages = client.messages
+        original_create = messages.create
 
-        def wrapped_create(*args: Any, **kwargs: Any) -> Any:
+        async def wrapped_create(*args: Any, **kwargs: Any) -> Any:
             params: dict[str, Any] = dict(kwargs)
             if args:
                 first = args[0]
@@ -58,18 +52,18 @@ class OpenAiAdapter:
                 case_id=context.case_id,
                 session_id=context.session_id,
                 parent_call_id=context.parent_call_id,
-                model_provider="openai",
+                model_provider="anthropic",
                 model_name=model,
-                model_version=model,
-                model_configuration=_pick_keys(params, OPENAI_CONFIG_KEYS),
+                model_version=derive_anthropic_model_version(model),
+                model_configuration=_pick_keys(params, ANTHROPIC_CONFIG_KEYS),
                 prompt_template_id=context.prompt_template_id,
                 prompt_template_version=context.prompt_template_version,
                 operator_id=context.operator_id,
-                input={"messages": params.get("messages")},
+                input={"messages": params.get("messages"), "system": params.get("system")},
             )
             try:
-                response = original_create(*args, **kwargs)
-                output = _extract_output(response, OPENAI_OUTPUT_KEYS)
+                response = await original_create(*args, **kwargs)
+                output = _extract_output(response, ANTHROPIC_OUTPUT_KEYS)
                 audit.end_call(call_id, output=output, output_decision=output)
                 return response
             except Exception:
@@ -81,7 +75,7 @@ class OpenAiAdapter:
                 )
                 raise
 
-        completions.create = wrapped_create
+        messages.create = wrapped_create
 
 
-openai_adapter = OpenAiAdapter()
+async_anthropic_adapter = AsyncAnthropicAdapter()

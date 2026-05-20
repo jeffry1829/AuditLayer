@@ -16,7 +16,7 @@ from .errors import (
 from .pii.redactor import PiiRedactor
 from .pii.token_store import PiiTokenStore
 from .providers.base import ProviderHostLogger, WrapContext
-from .providers.registry import wrap_client
+from .providers.registry import wrap_client, wrap_client_async
 from .schema.hash_chain import compute_entry_hash, link_entry
 from .schema.types import SCHEMA_VERSION, SDK_NAME, SDK_VERSION
 from .signers.base import Signer
@@ -207,9 +207,20 @@ class AuditLogger(ProviderHostLogger):
         return self._persist(input_for_entry)
 
     def wrap(self, client: Any, context: WrapContext) -> Any:
-        """Wrap a provider client (mutates client in place, returns it)."""
+        """Wrap a sync provider client (mutates in place, returns it)."""
 
         return wrap_client(self, client, context)
+
+    def wrap_async(self, client: Any, context: WrapContext) -> Any:
+        """Wrap an async provider client.
+
+        Spec §2.3 requires the async surface to be distinct from ``wrap()``;
+        detection is by ``inspect.iscoroutinefunction`` on the client's
+        generation method so an ``AsyncAnthropic`` cannot be silently
+        downgraded to the sync path or vice versa.
+        """
+
+        return wrap_client_async(self, client, context)
 
     def close(self) -> None:
         self.storage.close()

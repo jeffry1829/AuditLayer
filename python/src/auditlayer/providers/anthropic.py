@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import inspect
 import re
 from typing import Any
 
@@ -44,7 +45,13 @@ class AnthropicAdapter:
         messages = getattr(client, "messages", None)
         if messages is None:
             return False
-        return callable(getattr(messages, "create", None))
+        create = getattr(messages, "create", None)
+        if not callable(create):
+            return False
+        # Async clients are handled by the async adapter; the sync path must
+        # not accidentally wrap a coroutine function (the wrapper would treat
+        # the unawaited coroutine as the response).
+        return not inspect.iscoroutinefunction(create)
 
     def wrap(self, audit: ProviderHostLogger, client: Any, context: WrapContext) -> None:
         messages = client.messages
