@@ -56,6 +56,9 @@ Homepage = "https://github.com/jeffry1829/AuditLayer"
 Repository = "https://github.com/jeffry1829/AuditLayer"
 Issues = "https://github.com/jeffry1829/AuditLayer/issues"
 
+[project.scripts]
+auditlayer = "auditlayer.cli.main:main"
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/auditlayer"]
 
