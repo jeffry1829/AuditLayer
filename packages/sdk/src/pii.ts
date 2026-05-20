@@ -1,30 +1,22 @@
 import { createHash, randomBytes } from 'node:crypto';
 
-import type { PiiPatternName, PiiRedactionConfig } from './config.js';
+import type { PiiRedactionConfig } from './config.js';
+import { PII_DEFAULTS } from './defaults.js';
+import { AuditLayerPiiError, ERROR_CODES } from './errors.js';
+import {
+  ALL_PII_PATTERN_NAMES,
+  DEFAULT_ENABLED_PII_PATTERNS,
+  DEFAULT_PII_PATTERNS,
+  PII_PATTERN_REGISTRY,
+  type PiiPatternName,
+} from './pii-patterns.js';
 
-/**
- * Built-in PII detection patterns. All patterns are bounded length to avoid
- * catastrophic-backtracking risk on adversarial input. Custom patterns the
- * caller supplies are their own responsibility.
- */
-export const DEFAULT_PII_PATTERNS: Record<PiiPatternName, RegExp> = {
-  // Bounded local-part and domain length; TLD ≥ 2 letters.
-  email: /[A-Za-z0-9._%+-]{1,64}@[A-Za-z0-9-]{1,63}(\.[A-Za-z0-9-]{1,63}){0,4}\.[A-Za-z]{2,24}/g,
-  phone: /\+?\d[\d ()-]{6,30}\d/g,
-  ssn: /\b\d{3}-\d{2}-\d{4}\b/g,
-  nhsNumber: /\b\d{3}[ -]?\d{3}[ -]?\d{4}\b/g,
-  euNationalId: /\b[A-Z]{1,2}\d{6,12}[A-Z]?\b/g,
-  ipAddress: /\b(?:\d{1,3}\.){3}\d{1,3}\b/g,
-  // Bounded total length (~19 digits + 6 separators) to prevent backtracking.
-  creditCard: /\b\d(?:[ -]?\d){12,18}\b/g,
-  iban: /\b[A-Z]{2}\d{2}[A-Z0-9]{10,30}\b/g,
-  // Naive: capitalized two-token name. Will produce false positives. The MVP
-  // emits the token; customers can disable or add a custom pattern.
-  name: /\b[A-Z][a-z]{1,20} [A-Z][a-z]{1,20}\b/g,
-  // Best-effort numeric-prefixed address line. Atomic-style limits on word
-  // repetition to bound backtracking.
-  address:
-    /\b\d{1,5}\s+(?:[A-Z][a-z]{1,20}\s){1,4}(Street|Avenue|Road|Lane|Boulevard|Drive|Court|Place|St|Ave|Rd|Blvd|Dr)\b/g,
+export {
+  ALL_PII_PATTERN_NAMES,
+  DEFAULT_ENABLED_PII_PATTERNS,
+  DEFAULT_PII_PATTERNS,
+  PII_PATTERN_REGISTRY,
+  type PiiPatternName,
 };
 
 export interface PiiTokenStore {
@@ -36,6 +28,18 @@ export interface PiiTokenStore {
   eraseCase(caseId: string): Promise<void> | void;
   /** Optional resource cleanup. */
   close?(): void | Promise<void>;
+}
+
+function mintPseudonym(): string {
+  return `${PII_DEFAULTS.pseudonymPrefix}:${randomBytes(PII_DEFAULTS.pseudonymRandomBytes).toString('hex')}`;
+}
+
+function compositeKey(caseId: string, fieldKey: string, value: string): string {
+  // The 0x1F (Unit Separator) byte cannot appear in any of the inputs we
+  // accept and is therefore a safe internal delimiter even if caseId or value
+  // contain "::".
+  const d = PII_DEFAULTS.compositeDelimiter;
+  return `${caseId}${d}${fieldKey}${d}${value}`;
 }
 
 /**
@@ -58,7 +62,7 @@ export class InMemoryPiiTokenStore implements PiiTokenStore {
     const forwardKey = compositeKey(caseId, fieldKey, value);
     const existing = this.forward.get(forwardKey);
     if (existing) return existing;
-    const token = `pii:${randomBytes(8).toString('hex')}`;
+    const token = mintPseudonym();
     this.forward.set(forwardKey, token);
     this.reverse.set(token, { caseId, forwardKey, value });
     let set = this.caseIndex.get(caseId);
@@ -86,13 +90,6 @@ export class InMemoryPiiTokenStore implements PiiTokenStore {
   }
 }
 
-function compositeKey(caseId: string, fieldKey: string, value: string): string {
-  // The 0x1F (Unit Separator) byte cannot appear in any of the inputs we
-  // accept and is therefore a safe internal delimiter even if caseId or value
-  // contain "::".
-  return `${caseId}\x1f${fieldKey}\x1f${value}`;
-}
-
 /**
  * SQLite-backed token store. `better-sqlite3` is an optional peer dep; if the
  * customer enables the SQLite store they must install it.
@@ -115,9 +112,11 @@ export class SqlitePiiTokenStore implements PiiTokenStore {
       // eslint-disable-next-line @typescript-eslint/no-require-imports
       Database = require('better-sqlite3');
     } catch (err) {
-      throw new Error(
+      throw new AuditLayerPiiError(
+        ERROR_CODES.PII_TOKEN_STORE_MISSING_DEP,
         'SqlitePiiTokenStore requires the optional peer dependency "better-sqlite3". ' +
           `Install it with: pnpm add better-sqlite3. Original error: ${(err as Error).message}`,
+        { dependency: 'better-sqlite3' },
       );
     }
     this.db = new Database(path);
@@ -140,7 +139,7 @@ export class SqlitePiiTokenStore implements PiiTokenStore {
       .prepare('SELECT token FROM pii_tokens WHERE case_id = ? AND field_key = ? AND value = ?')
       .get(caseId, fieldKey, value) as { token: string } | undefined;
     if (existing) return existing.token;
-    const token = `pii:${randomBytes(8).toString('hex')}`;
+    const token = mintPseudonym();
     this.db
       .prepare(
         'INSERT INTO pii_tokens (case_id, field_key, value, token, created_at) VALUES (?, ?, ?, ?, ?)',
@@ -177,9 +176,9 @@ export function detectPii(
   customPatterns: Record<string, RegExp> = {},
 ): Array<{ patternName: string; match: string; index: number }> {
   const results: Array<{ patternName: string; match: string; index: number }> = [];
-  for (const [name, regex] of Object.entries(DEFAULT_PII_PATTERNS)) {
-    if (!enabledPatterns[name as PiiPatternName]) continue;
-    pushMatches(text, regex, name, results);
+  for (const name of ALL_PII_PATTERN_NAMES) {
+    if (!enabledPatterns[name]) continue;
+    pushMatches(text, PII_PATTERN_REGISTRY[name].regex, name, results);
   }
   for (const [name, regex] of Object.entries(customPatterns)) {
     pushMatches(text, regex, name, results);
@@ -217,21 +216,16 @@ export class PiiRedactor {
 
   constructor(config: PiiRedactionConfig | undefined, tokenStore: PiiTokenStore | null) {
     this.enabled = Boolean(config?.enabled);
-    this.strategy = config?.strategy ?? 'pseudonymize';
-    this.enabledPatterns = config?.patterns ?? {
-      email: true,
-      phone: true,
-      ssn: true,
-      ipAddress: true,
-      creditCard: true,
-      iban: true,
-    };
+    this.strategy = config?.strategy ?? PII_DEFAULTS.strategy;
+    this.enabledPatterns = config?.patterns ?? { ...DEFAULT_ENABLED_PII_PATTERNS };
     this.customPatterns = config?.customPatterns ?? {};
     this.tokenStore = tokenStore;
     if (this.enabled && this.strategy === 'pseudonymize' && !this.tokenStore) {
-      throw new Error(
+      throw new AuditLayerPiiError(
+        ERROR_CODES.PII_TOKEN_STORE_MISSING,
         'PiiRedactor: pseudonymize strategy requires a token store. ' +
           'Configure piiRedaction.tokenStore.',
+        { strategy: this.strategy },
       );
     }
   }
@@ -303,9 +297,9 @@ export class PiiRedactor {
       fieldsTouched.add(`${fieldPath}:${m.patternName}`);
       let replacement: string;
       if (this.strategy === 'remove') {
-        replacement = '[REDACTED]';
+        replacement = PII_DEFAULTS.removePlaceholder;
       } else if (this.strategy === 'hash') {
-        replacement = `pii-h:${hashString(m.match).slice(0, 16)}`;
+        replacement = `${PII_DEFAULTS.hashPrefix}:${hashString(m.match).slice(0, PII_DEFAULTS.hashHexLength)}`;
       } else {
         // pseudonymize — uses token store
         const token = await this.tokenStore!.getOrCreateToken(

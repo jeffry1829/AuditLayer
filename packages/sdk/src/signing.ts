@@ -1,6 +1,8 @@
 import { createHmac } from 'node:crypto';
 
 import type { SigningKeyConfig } from './config.js';
+import { SIGNING_DEFAULTS } from './defaults.js';
+import { AuditLayerConfigError, AuditLayerSignerError, ERROR_CODES } from './errors.js';
 
 export interface Signer {
   /** Returns a signature string for the given SHA-256 hex digest. */
@@ -10,21 +12,21 @@ export interface Signer {
 }
 
 export class InlineSigner implements Signer {
-  readonly keyId = 'inline';
+  readonly keyId = SIGNING_DEFAULTS.inlineKeyId;
   constructor(private readonly secret: string) {
-    if (!secret || secret.length < 16) {
-      // Phase 1: refuse very short secrets so that we don't ship signatures
-      // that are trivially forgeable. The spec strongly recommends KMS.
-      throw new Error(
-        'InlineSigner: secret must be at least 16 characters. ' +
+    if (!secret || secret.length < SIGNING_DEFAULTS.inlineSecretMinLength) {
+      throw new AuditLayerSignerError(
+        ERROR_CODES.SIGNER_INVALID_SECRET,
+        `InlineSigner: secret must be at least ${SIGNING_DEFAULTS.inlineSecretMinLength} characters. ` +
           'Inline signing is intended for development only; use a KMS signer in production.',
+        { minLength: SIGNING_DEFAULTS.inlineSecretMinLength },
       );
     }
   }
 
   async sign(entryHashHex: string): Promise<string> {
     const mac = createHmac('sha256', this.secret).update(entryHashHex, 'utf8').digest('hex');
-    return `hmac-sha256:${this.keyId}:${mac}`;
+    return `${SIGNING_DEFAULTS.inlineSignaturePrefix}:${this.keyId}:${mac}`;
   }
 }
 
@@ -37,7 +39,11 @@ class ExternalSigner implements Signer {
   async sign(entryHashHex: string): Promise<string> {
     const out = await this.signFn(entryHashHex);
     if (typeof out !== 'string' || out.length === 0) {
-      throw new Error('External signer returned an invalid signature');
+      throw new AuditLayerSignerError(
+        ERROR_CODES.SIGNER_EXTERNAL_INVALID_OUTPUT,
+        'External signer returned an invalid signature',
+        { keyId: this.keyId },
+      );
     }
     return out;
   }
@@ -52,7 +58,11 @@ export function createSigner(config: SigningKeyConfig): Signer {
     default: {
       const _exhaustive: never = config;
       void _exhaustive;
-      throw new Error('createSigner: unknown signing key kind');
+      throw new AuditLayerConfigError(
+        ERROR_CODES.CONFIG_INVALID,
+        'createSigner: unknown signing key kind',
+        { received: config },
+      );
     }
   }
 }

@@ -2,21 +2,31 @@ import { mkdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { AuditLogger } from '@auditlayer/sdk';
+import { AuditLogger, RETENTION_DEFAULTS } from '@auditlayer/sdk';
+
+import { CREDIT_POLICY, type CreditPolicyConfig } from './config.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const auditDir = resolve(__dirname, '../audit-logs');
 mkdirSync(auditDir, { recursive: true });
 
+const signingSecret = process.env.AUDIT_SIGNING_KEY;
+if (!signingSecret) {
+  console.error(
+    'AUDIT_SIGNING_KEY env var is required. Set a 16+ character secret to run the example.',
+  );
+  process.exit(2);
+}
+
 const audit = new AuditLogger({
   systemId: 'credit-decision-example',
   storage: { type: 'local', dir: auditDir },
-  signingKey: {
-    kind: 'inline',
-    secret: process.env.AUDIT_SIGNING_KEY ?? 'demo-secret-key-not-for-production-1234567890',
-  },
+  signingKey: { kind: 'inline', secret: signingSecret },
   hashChain: { enabled: true, algorithm: 'sha256' },
-  retention: { minimumDays: 180, targetDays: 2555 },
+  retention: {
+    minimumDays: RETENTION_DEFAULTS.deployerMinimumDays,
+    targetDays: RETENTION_DEFAULTS.providerTargetDays,
+  },
 });
 
 interface Applicant {
@@ -63,9 +73,10 @@ interface CreditOutput {
   reasonCodes: string[];
 }
 
-function scoreApplicant(a: Applicant): CreditOutput {
-  const dti = (a.existingDebt + a.requestedAmount * 0.05) / Math.max(1, a.income);
-  if (a.creditScore < 640) {
+function scoreApplicant(a: Applicant, p: CreditPolicyConfig): CreditOutput {
+  const dti =
+    (a.existingDebt + a.requestedAmount * p.requestedAmountServicingFactor) / Math.max(1, a.income);
+  if (a.creditScore < p.minCreditScore) {
     return {
       decision: 'decline',
       limit: 0,
@@ -74,7 +85,7 @@ function scoreApplicant(a: Applicant): CreditOutput {
       reasonCodes: ['LOW_CREDIT_SCORE'],
     };
   }
-  if (dti > 0.45) {
+  if (dti > p.maxDti) {
     return {
       decision: 'escalate',
       limit: 0,
@@ -86,8 +97,8 @@ function scoreApplicant(a: Applicant): CreditOutput {
   return {
     decision: 'approve',
     limit: a.requestedAmount,
-    termMonths: 36,
-    aprBps: a.creditScore >= 750 ? 750 : 1250,
+    termMonths: p.termMonths,
+    aprBps: a.creditScore >= p.primeCreditScore ? p.aprBpsPrime : p.aprBpsStandard,
     reasonCodes: ['CREDIT_OK', 'DTI_OK'],
   };
 }
@@ -99,13 +110,13 @@ async function main() {
       modelProvider: 'self_hosted',
       modelName: 'credit-scorecard',
       modelVersion: '2026-04',
-      modelConfiguration: { policyVersion: '7.1' },
+      modelConfiguration: { policyVersion: CREDIT_POLICY.policyVersion },
       promptTemplateId: 'credit-scoring-policy-v7',
       promptTemplateVersion: '7.1.0',
       operatorId: 'credit-engine',
       input: a,
     });
-    const out = scoreApplicant(a);
+    const out = scoreApplicant(a, CREDIT_POLICY);
     const needsReview = out.decision === 'escalate';
     await audit.endCall(callId, {
       outputDecision: out,

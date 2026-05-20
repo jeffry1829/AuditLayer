@@ -8,12 +8,13 @@ interface PackageManifest {
 }
 
 function locateManifest(): string {
+  // dist/version.js → ../package.json after build.
+  // src/version.ts → ../package.json under ts-node / vitest as well.
   const here = dirname(fileURLToPath(import.meta.url));
   return join(here, '..', 'package.json');
 }
 
 const manifest = JSON.parse(readFileSync(locateManifest(), 'utf8')) as PackageManifest;
 
-export const SDK_NAME = manifest.name;
-export const SDK_VERSION = manifest.version;
-export const RECORDED_BY = `${SDK_NAME}@${SDK_VERSION}`;
+export const CLI_NAME = manifest.name;
+export const CLI_VERSION = manifest.version;

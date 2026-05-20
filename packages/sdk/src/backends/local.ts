@@ -6,6 +6,8 @@ import { createInterface } from 'node:readline';
 import { AuditLogEntrySchema, type AuditLogEntry } from '@auditlayer/schema';
 
 import type { LocalStorageConfig } from '../config.js';
+import { STORAGE_DEFAULTS } from '../defaults.js';
+import { ERROR_CODES } from '../errors.js';
 import { assertSafePathSegment } from '../util.js';
 import type { AppendOptions, QueryOptions, StorageBackend } from './types.js';
 
@@ -15,7 +17,7 @@ export class LocalStorageBackend implements StorageBackend {
 
   constructor(config: LocalStorageConfig) {
     this.dir = config.dir;
-    this.rotateBy = config.rotateBy ?? 'hour';
+    this.rotateBy = config.rotateBy ?? STORAGE_DEFAULTS.rotateBy;
   }
 
   async append(entry: AuditLogEntry, opts: AppendOptions): Promise<void> {
@@ -43,7 +45,7 @@ export class LocalStorageBackend implements StorageBackend {
         } catch (err) {
           process.emitWarning(
             `LocalStorageBackend: malformed JSON in ${file} — skipping line (${(err as Error).message})`,
-            { code: 'AUDITLAYER_BAD_JSON' },
+            { code: ERROR_CODES.STORAGE_BAD_JSON },
           );
           continue;
         }
@@ -51,7 +53,7 @@ export class LocalStorageBackend implements StorageBackend {
         if (!result.success) {
           process.emitWarning(
             `LocalStorageBackend: entry failed schema validation in ${file} — skipping`,
-            { code: 'AUDITLAYER_BAD_SCHEMA' },
+            { code: ERROR_CODES.STORAGE_BAD_SCHEMA },
           );
           continue;
         }
@@ -70,7 +72,8 @@ export class LocalStorageBackend implements StorageBackend {
     const dd = String(when.getUTCDate()).padStart(2, '0');
     const hh = String(when.getUTCHours()).padStart(2, '0');
     const dirSegments = [yyyy, mm, dd];
-    const fileName = this.rotateBy === 'hour' ? `${hh}.jsonl` : 'day.jsonl';
+    const stem = this.rotateBy === 'hour' ? hh : 'day';
+    const fileName = `${stem}${STORAGE_DEFAULTS.jsonlExtension}`;
     const fullPath = join(this.dir, systemId, yyyy, mm, dd, fileName);
     return { fullPath, dirSegments };
   }
@@ -83,7 +86,7 @@ export class LocalStorageBackend implements StorageBackend {
         const next = join(p, item.name);
         if (item.isDirectory()) {
           await walk(next);
-        } else if (item.isFile() && item.name.endsWith('.jsonl')) {
+        } else if (item.isFile() && item.name.endsWith(STORAGE_DEFAULTS.jsonlExtension)) {
           out.push(next);
         }
       }

@@ -1,6 +1,8 @@
 import { AuditLogEntrySchema, type AuditLogEntry } from '@auditlayer/schema';
 
 import type { S3StorageConfig } from '../config.js';
+import { STORAGE_DEFAULTS } from '../defaults.js';
+import { AuditLayerStorageError, ERROR_CODES } from '../errors.js';
 import { assertSafePathSegment } from '../util.js';
 import type { AppendOptions, QueryOptions, StorageBackend } from './types.js';
 
@@ -27,9 +29,11 @@ function loadAwsSdk(): S3Module {
     const mod = require('@aws-sdk/client-s3') as S3Module;
     return mod;
   } catch (err) {
-    throw new Error(
+    throw new AuditLayerStorageError(
+      ERROR_CODES.STORAGE_BACKEND_MISSING_DEP,
       'S3StorageBackend requires the optional peer dependency "@aws-sdk/client-s3". ' +
         `Install it with: pnpm add @aws-sdk/client-s3. Original error: ${(err as Error).message}`,
+      { dependency: '@aws-sdk/client-s3' },
     );
   }
 }
@@ -71,8 +75,8 @@ export class S3StorageBackend implements StorageBackend {
         Bucket: this.bucket,
         Key: key,
         Body: body,
-        ContentType: 'application/json',
-        ChecksumAlgorithm: 'SHA256',
+        ContentType: STORAGE_DEFAULTS.s3ContentType,
+        ChecksumAlgorithm: STORAGE_DEFAULTS.s3ChecksumAlgorithm,
       }),
     );
   }

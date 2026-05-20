@@ -2,19 +2,26 @@ import { mkdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { AuditLogger } from '@auditlayer/sdk';
+import { AuditLogger, RETENTION_DEFAULTS } from '@auditlayer/sdk';
+
+import { TRIAGE_POLICY, type TriagePolicyConfig } from './config.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const auditDir = resolve(__dirname, '../audit-logs');
 mkdirSync(auditDir, { recursive: true });
 
+const signingSecret = process.env.AUDIT_SIGNING_KEY;
+if (!signingSecret) {
+  console.error(
+    'AUDIT_SIGNING_KEY env var is required. Set a 16+ character secret to run the example.',
+  );
+  process.exit(2);
+}
+
 const audit = new AuditLogger({
   systemId: 'healthcare-triage-example',
   storage: { type: 'local', dir: auditDir },
-  signingKey: {
-    kind: 'inline',
-    secret: process.env.AUDIT_SIGNING_KEY ?? 'demo-secret-key-not-for-production-1234567890',
-  },
+  signingKey: { kind: 'inline', secret: signingSecret },
   hashChain: { enabled: true, algorithm: 'sha256' },
   piiRedaction: {
     enabled: true,
@@ -22,7 +29,11 @@ const audit = new AuditLogger({
     patterns: { email: true, phone: true, nhsNumber: true, name: true, address: true },
     tokenStore: { type: 'memory' },
   },
-  retention: { minimumDays: 180, targetDays: 3650 },
+  retention: {
+    minimumDays: RETENTION_DEFAULTS.deployerMinimumDays,
+    // Health records retention typically 10y; override the SDK default.
+    targetDays: 3650,
+  },
 });
 
 interface Patient {
@@ -60,9 +71,13 @@ interface TriageOutput {
   reasonCodes: string[];
 }
 
-function triage(p: Patient): TriageOutput {
-  const hasRed = p.symptoms.some((s) => /chest pain|shortness of breath|stroke/.test(s));
-  if (hasRed && p.vitals.spo2 < 94) {
+function hasRedFlagSymptom(symptoms: string[], policy: TriagePolicyConfig): boolean {
+  return symptoms.some((s) => policy.redFlagSymptomPatterns.some((re) => re.test(s)));
+}
+
+function triage(p: Patient, policy: TriagePolicyConfig): TriageOutput {
+  const hasRed = hasRedFlagSymptom(p.symptoms, policy);
+  if (hasRed && p.vitals.spo2 < policy.spo2RedFlagThreshold) {
     return {
       triageLevel: 1,
       recommendation: 'immediate',
@@ -78,7 +93,12 @@ function triage(p: Patient): TriageOutput {
       reasonCodes: ['RED_FLAG_SYMPTOM'],
     };
   }
-  return { triageLevel: 4, recommendation: 'routine', confidence: 0.6, reasonCodes: ['ROUTINE'] };
+  return {
+    triageLevel: policy.defaultLevel,
+    recommendation: 'routine',
+    confidence: policy.defaultConfidence,
+    reasonCodes: ['ROUTINE'],
+  };
 }
 
 async function main() {
@@ -88,20 +108,21 @@ async function main() {
       modelProvider: 'self_hosted',
       modelName: 'triage-cdsm-2026',
       modelVersion: '2.4.1',
-      modelConfiguration: { confidenceThreshold: 0.6 },
+      modelConfiguration: { confidenceThreshold: TRIAGE_POLICY.lowConfidenceThreshold },
       promptTemplateId: 'triage-policy-v4',
       promptTemplateVersion: '4.0.0',
       operatorId: 'cdsm-service',
-      referenceDatabase: 'BNF-edition-2026/Q2',
+      referenceDatabase: TRIAGE_POLICY.referenceDatabase,
       input: { ...p },
     });
-    const out = triage(p);
+    const out = triage(p, TRIAGE_POLICY);
     await audit.endCall(callId, {
       outputDecision: out,
       reasonCodes: out.reasonCodes,
-      riskFlags: out.confidence < 0.7 ? ['low_confidence'] : undefined,
+      riskFlags:
+        out.confidence < TRIAGE_POLICY.lowConfidenceThreshold ? ['low_confidence'] : undefined,
       humanReview:
-        out.triageLevel <= 2
+        out.triageLevel <= TRIAGE_POLICY.humanReviewMaxLevel
           ? {
               reviewerId: 'clinician-on-call',
               reviewedAt: new Date().toISOString(),

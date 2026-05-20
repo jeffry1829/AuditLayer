@@ -8,6 +8,12 @@ import {
   type AuditLogEntry,
   type ChainVerificationResult,
 } from '@auditlayer/schema';
+import {
+  AuditLayerConfigError,
+  AuditLayerSchemaError,
+  CLI_DEFAULTS,
+  ERROR_CODES,
+} from '@auditlayer/sdk';
 
 import { createBackend } from './backend-factory.js';
 import type { CliConfig } from './config.js';
@@ -16,7 +22,11 @@ function validateIsoBound(value: string | undefined, label: string): void {
   if (value === undefined) return;
   const t = Date.parse(value);
   if (Number.isNaN(t)) {
-    throw new Error(`${label} must be an ISO-8601 timestamp (got ${JSON.stringify(value)})`);
+    throw new AuditLayerSchemaError(
+      ERROR_CODES.SCHEMA_INVALID_TIMESTAMP,
+      `${label} must be an ISO-8601 timestamp (got ${JSON.stringify(value)})`,
+      { label, value },
+    );
   }
 }
 
@@ -24,7 +34,11 @@ function validateRange(from: string | undefined, to: string | undefined): void {
   validateIsoBound(from, '--from');
   validateIsoBound(to, '--to');
   if (from && to && Date.parse(from) > Date.parse(to)) {
-    throw new Error(`--from (${from}) must not be after --to (${to}).`);
+    throw new AuditLayerConfigError(
+      ERROR_CODES.CONFIG_INVALID,
+      `--from (${from}) must not be after --to (${to}).`,
+      { from, to },
+    );
   }
 }
 
@@ -40,10 +54,7 @@ export const defaultIO: CommandIO = {
   cwd: process.cwd(),
 };
 
-const DEFAULT_INIT_CONFIG = {
-  systemId: 'your-system-id',
-  storage: { type: 'local' as const, dir: './audit-logs' },
-};
+const DEFAULT_INIT_CONFIG = CLI_DEFAULTS.initConfigTemplate;
 
 export interface InitOptions {
   output?: string;
@@ -51,7 +62,7 @@ export interface InitOptions {
 }
 
 export async function initCommand(opts: InitOptions, io: CommandIO = defaultIO): Promise<number> {
-  const path = resolve(io.cwd, opts.output ?? 'auditlayer.config.json');
+  const path = resolve(io.cwd, opts.output ?? CLI_DEFAULTS.initOutputPath);
   try {
     await writeFile(path, JSON.stringify(DEFAULT_INIT_CONFIG, null, 2) + '\n', {
       encoding: 'utf8',
@@ -100,7 +111,7 @@ export async function queryCommand(
     }
     count++;
   }
-  io.stderr.write(`Matched ${count} entr${count === 1 ? 'y' : 'ies'} for case ${opts.caseId}.\n`);
+  io.stderr.write(`Matched ${entryCount(count)} for case ${opts.caseId}.\n`);
   await backend.close?.();
   return 0;
 }
@@ -139,9 +150,7 @@ export async function verifyCommand(
     );
   } else {
     if (result.valid) {
-      io.stdout.write(
-        `✔ Chain valid. ${entries.length} entr${entries.length === 1 ? 'y' : 'ies'} verified.\n`,
-      );
+      io.stdout.write(`✔ Chain valid. ${entryCount(entries.length)} verified.\n`);
     } else {
       io.stdout.write(`✘ Chain INVALID at index ${result.brokenAt}.\n`);
       io.stdout.write(`  reason: ${result.reason}\n`);
@@ -204,6 +213,10 @@ export async function exportCommand(
   }
   io.stderr.write(`Wrote ${count} entries to ${opts.output ?? 'stdout'}\n`);
   return 0;
+}
+
+function entryCount(n: number): string {
+  return `${n} entr${n === 1 ? 'y' : 'ies'}`;
 }
 
 function formatEntry(entry: AuditLogEntry): string {

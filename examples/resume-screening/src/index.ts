@@ -4,17 +4,24 @@ import { dirname, resolve } from 'node:path';
 
 import { AuditLogger } from '@auditlayer/sdk';
 
+import { RESUME_SCORING, type ResumeScoringConfig } from './config.js';
+
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const auditDir = resolve(__dirname, '../audit-logs');
 mkdirSync(auditDir, { recursive: true });
 
+const signingSecret = process.env.AUDIT_SIGNING_KEY;
+if (!signingSecret) {
+  console.error(
+    'AUDIT_SIGNING_KEY env var is required. Set a 16+ character secret to run the example.',
+  );
+  process.exit(2);
+}
+
 const audit = new AuditLogger({
   systemId: 'resume-screener-example',
   storage: { type: 'local', dir: auditDir },
-  signingKey: {
-    kind: 'inline',
-    secret: process.env.AUDIT_SIGNING_KEY ?? 'demo-secret-key-not-for-production-1234567890',
-  },
+  signingKey: { kind: 'inline', secret: signingSecret },
   hashChain: { enabled: true, algorithm: 'sha256' },
   piiRedaction: {
     enabled: true,
@@ -30,14 +37,17 @@ const mockAnthropic = {
     create: async (params: Record<string, unknown>) => {
       const messages = params['messages'] as Array<{ content: string }> | undefined;
       const resumeText = messages?.[0]?.content ?? '';
-      const score = computeMockScore(resumeText);
+      const score = computeMockScore(resumeText, RESUME_SCORING);
       return {
         id: `msg_${Math.random().toString(36).slice(2)}`,
         model: params['model'],
         content: [
           {
             type: 'text',
-            text: JSON.stringify({ score, recommended: score >= 7 }),
+            text: JSON.stringify({
+              score,
+              recommended: score >= RESUME_SCORING.recommendThreshold,
+            }),
           },
         ],
         usage: { input_tokens: 120, output_tokens: 18 },
@@ -107,12 +117,10 @@ async function main() {
   );
 }
 
-function computeMockScore(text: string): number {
-  // Naive deterministic mock: keyword presence raises the score.
-  const positives = ['PostgreSQL', 'Kubernetes', 'compliance', 'AI', 'React'];
-  let score = 5;
-  for (const k of positives) if (text.includes(k)) score += 1;
-  return Math.min(10, score);
+function computeMockScore(text: string, cfg: ResumeScoringConfig): number {
+  let score = cfg.baseScore;
+  for (const k of cfg.positiveKeywords) if (text.includes(k)) score += 1;
+  return Math.min(cfg.maxScore, score);
 }
 
 main().catch((err) => {

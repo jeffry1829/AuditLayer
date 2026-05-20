@@ -8,6 +8,7 @@ import { verifyChain } from '@auditlayer/schema';
 
 import { AuditLogger } from '../src/audit-logger.js';
 import { LocalStorageBackend } from '../src/backends/local.js';
+import { AuditLayerProviderError, ERROR_CODES } from '../src/errors.js';
 
 const TEST_SECRET = 'test-secret-key-with-enough-length-1234567890';
 
@@ -177,14 +178,18 @@ describe('AuditLogger', () => {
 
   it('wrap() rejects unsupported clients', () => {
     const audit = makeLogger(dir);
-    expect(() =>
+    try {
       audit.wrap({} as object, {
         caseId: 'c',
         promptTemplateId: 'p',
         promptTemplateVersion: '1.0',
         operatorId: 'o',
-      }),
-    ).toThrow(/neither an Anthropic nor OpenAI/);
+      });
+      throw new Error('expected wrap() to throw');
+    } catch (err) {
+      expect(err).toBeInstanceOf(AuditLayerProviderError);
+      expect((err as AuditLayerProviderError).code).toBe(ERROR_CODES.PROVIDER_UNSUPPORTED_CLIENT);
+    }
   });
 
   it('wrap() intercepts Anthropic messages.create()', async () => {

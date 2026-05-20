@@ -11,8 +11,10 @@ import { LocalStorageBackend } from './backends/local.js';
 import { S3StorageBackend } from './backends/s3.js';
 import type { StorageBackend } from './backends/types.js';
 import type { AuditLoggerConfig, EndCallInput, StartCallInput, WrapContext } from './config.js';
+import { AuditLayerConfigError, AuditLayerSchemaError, ERROR_CODES } from './errors.js';
 import { InMemoryPiiTokenStore, PiiRedactor, SqlitePiiTokenStore } from './pii.js';
 import type { PiiTokenStore } from './pii.js';
+import { wrapClient } from './providers/registry.js';
 import { createSigner, type Signer } from './signing.js';
 import { assertSafePathSegment, deriveDurationMs, fingerprint, nowIso, uuidv4 } from './util.js';
 import { RECORDED_BY } from './version.js';
@@ -48,7 +50,11 @@ export class AuditLogger {
 
   constructor(config: AuditLoggerConfig) {
     if (!config.systemId || !config.systemId.trim()) {
-      throw new Error('AuditLogger: systemId is required');
+      throw new AuditLayerConfigError(
+        ERROR_CODES.CONFIG_MISSING_FIELD,
+        'AuditLogger: systemId is required',
+        { field: 'systemId' },
+      );
     }
     assertSafePathSegment(config.systemId, 'systemId');
     this.systemId = config.systemId;
@@ -60,7 +66,11 @@ export class AuditLogger {
 
   async startCall(input: StartCallInput): Promise<string> {
     if (!input.caseId || !input.caseId.trim()) {
-      throw new Error('startCall: caseId is required');
+      throw new AuditLayerConfigError(
+        ERROR_CODES.CONFIG_MISSING_FIELD,
+        'startCall: caseId is required',
+        { field: 'caseId' },
+      );
     }
     const callId = uuidv4();
     const startedAt = nowIso();
@@ -97,8 +107,10 @@ export class AuditLogger {
   async endCall(callId: string, end: EndCallInput): Promise<AuditLogEntry> {
     const pending = this.pending.get(callId);
     if (!pending) {
-      throw new Error(
+      throw new AuditLayerConfigError(
+        ERROR_CODES.LOGGER_CALL_NOT_PENDING,
         `endCall: callId ${callId} is not in the pending set (already finalised or never started).`,
+        { callId },
       );
     }
     this.pending.delete(callId);
@@ -140,22 +152,12 @@ export class AuditLogger {
   }
 
   /**
-   * Wrap a third-party SDK client (Anthropic or OpenAI). The wrapped client
-   * exposes the same surface; calls to known generation methods are
-   * intercepted and logged with the context supplied to `wrap`.
+   * Wrap a third-party SDK client. Provider is detected via the provider
+   * registry — see `packages/sdk/src/providers/`. Throws
+   * `AuditLayerProviderError` if no registered adapter recognises the client.
    */
   wrap<T extends object>(client: T, context: WrapContext): T {
-    const provider = detectProvider(client);
-    if (provider === 'anthropic') {
-      return wrapAnthropic(this, client, context) as T;
-    }
-    if (provider === 'openai') {
-      return wrapOpenAi(this, client, context) as T;
-    }
-    throw new Error(
-      'AuditLogger.wrap: client is neither an Anthropic nor OpenAI SDK instance. ' +
-        'Use startCall/endCall for unsupported clients.',
-    );
+    return wrapClient(this, client, context);
   }
 
   /** Serialize append + chain link under a lock so the chain stays linear. */
@@ -173,7 +175,11 @@ export class AuditLogger {
       void _sig;
       const recheck = computeEntryHash(hashed);
       if (recheck !== entry.entryHash) {
-        throw new Error('AuditLogger: entry hash recheck failed before persistence');
+        throw new AuditLayerSchemaError(
+          ERROR_CODES.SCHEMA_HASH_RECHECK_FAILED,
+          'AuditLogger: entry hash recheck failed before persistence',
+          { callId: entry.callId, expected: entry.entryHash, computed: recheck },
+        );
       }
       await this.backend.append(entry, { systemId: this.systemId });
       this.lastEntry = entry;
@@ -216,7 +222,11 @@ function createBackend(config: AuditLoggerConfig): StorageBackend {
     default: {
       const _exhaustive: never = config.storage;
       void _exhaustive;
-      throw new Error('AuditLogger: unknown storage backend');
+      throw new AuditLayerConfigError(
+        ERROR_CODES.CONFIG_UNKNOWN_BACKEND,
+        'AuditLogger: unknown storage backend',
+        { received: config.storage },
+      );
     }
   }
 }
@@ -233,155 +243,11 @@ function createPiiTokenStore(config: AuditLoggerConfig): PiiTokenStore | null {
     default: {
       const _exhaustive: never = store;
       void _exhaustive;
-      throw new Error('AuditLogger: unknown pii token store type');
+      throw new AuditLayerConfigError(
+        ERROR_CODES.CONFIG_UNKNOWN_STORE,
+        'AuditLogger: unknown pii token store type',
+        { received: store },
+      );
     }
   }
-}
-
-function detectProvider(client: object): 'anthropic' | 'openai' | null {
-  const c = client as Record<string, unknown>;
-  // OpenAI v4 and Anthropic SDKs are nearly disjoint shapes; we look for the
-  // specific method we are about to wrap.
-  const openaiCreate =
-    typeof (
-      (c['chat'] as Record<string, unknown> | undefined)?.['completions'] as
-        | Record<string, unknown>
-        | undefined
-    )?.['create'] === 'function';
-  if (openaiCreate) return 'openai';
-
-  const anthropicCreate =
-    typeof (c['messages'] as Record<string, unknown> | undefined)?.['create'] === 'function';
-  if (anthropicCreate) return 'anthropic';
-
-  return null;
-}
-
-function wrapAnthropic<T extends object>(audit: AuditLogger, client: T, context: WrapContext): T {
-  type CreateFn = (...args: unknown[]) => Promise<unknown>;
-  const messages = (client as unknown as { messages: { create: CreateFn } }).messages;
-  const originalCreate = messages.create.bind(messages);
-  messages.create = async (...args: unknown[]) => {
-    const params = (args[0] as Record<string, unknown>) ?? {};
-    const callId = await audit.startCall({
-      caseId: context.caseId,
-      sessionId: context.sessionId,
-      parentCallId: context.parentCallId,
-      modelProvider: 'anthropic',
-      modelName: String(params['model'] ?? 'unknown'),
-      modelVersion: deriveAnthropicModelVersion(String(params['model'] ?? '')),
-      modelConfiguration: extractAnthropicConfig(params),
-      promptTemplateId: context.promptTemplateId,
-      promptTemplateVersion: context.promptTemplateVersion,
-      operatorId: context.operatorId,
-      input: { messages: params['messages'], system: params['system'] },
-    });
-    try {
-      const response = await originalCreate(...args);
-      await audit.endCall(callId, {
-        output: extractAnthropicOutput(response),
-        outputDecision: extractAnthropicOutput(response),
-      });
-      return response;
-    } catch (err) {
-      await audit.endCall(callId, {
-        output: null,
-        outputDecision: null,
-        riskFlags: ['provider_error'],
-      });
-      throw err;
-    }
-  };
-  return client;
-}
-
-function wrapOpenAi<T extends object>(audit: AuditLogger, client: T, context: WrapContext): T {
-  type CreateFn = (...args: unknown[]) => Promise<unknown>;
-  const completions = (client as unknown as { chat: { completions: { create: CreateFn } } }).chat
-    .completions;
-  const originalCreate = completions.create.bind(completions);
-  completions.create = async (...args: unknown[]) => {
-    const params = (args[0] as Record<string, unknown>) ?? {};
-    const callId = await audit.startCall({
-      caseId: context.caseId,
-      sessionId: context.sessionId,
-      parentCallId: context.parentCallId,
-      modelProvider: 'openai',
-      modelName: String(params['model'] ?? 'unknown'),
-      modelVersion: String(params['model'] ?? ''),
-      modelConfiguration: extractOpenAiConfig(params),
-      promptTemplateId: context.promptTemplateId,
-      promptTemplateVersion: context.promptTemplateVersion,
-      operatorId: context.operatorId,
-      input: { messages: params['messages'] },
-    });
-    try {
-      const response = await originalCreate(...args);
-      await audit.endCall(callId, {
-        output: extractOpenAiOutput(response),
-        outputDecision: extractOpenAiOutput(response),
-      });
-      return response;
-    } catch (err) {
-      await audit.endCall(callId, {
-        output: null,
-        outputDecision: null,
-        riskFlags: ['provider_error'],
-      });
-      throw err;
-    }
-  };
-  return client;
-}
-
-function deriveAnthropicModelVersion(model: string): string {
-  // Anthropic snapshots are typically encoded in the model string itself
-  // (e.g., claude-3-5-sonnet-20241022 — the trailing date).
-  const m = /-(\d{8})$/.exec(model);
-  return m ? m[1]! : model || 'unknown';
-}
-
-function extractAnthropicConfig(params: Record<string, unknown>): Record<string, unknown> {
-  const out: Record<string, unknown> = {};
-  for (const key of ['temperature', 'top_p', 'top_k', 'max_tokens', 'stop_sequences']) {
-    if (key in params) out[key] = params[key];
-  }
-  return out;
-}
-
-function extractOpenAiConfig(params: Record<string, unknown>): Record<string, unknown> {
-  const out: Record<string, unknown> = {};
-  for (const key of [
-    'temperature',
-    'top_p',
-    'max_tokens',
-    'frequency_penalty',
-    'presence_penalty',
-  ]) {
-    if (key in params) out[key] = params[key];
-  }
-  return out;
-}
-
-function extractAnthropicOutput(response: unknown): unknown {
-  if (response && typeof response === 'object') {
-    const r = response as Record<string, unknown>;
-    const usage = r['usage'];
-    const content = r['content'];
-    return { content, usage, model: r['model'], id: r['id'] };
-  }
-  return response ?? null;
-}
-
-function extractOpenAiOutput(response: unknown): unknown {
-  if (response && typeof response === 'object') {
-    const r = response as Record<string, unknown>;
-    return {
-      choices: r['choices'],
-      usage: r['usage'],
-      model: r['model'],
-      id: r['id'],
-    };
-  }
-  return response ?? null;
 }

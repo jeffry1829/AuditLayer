@@ -1,5 +1,9 @@
 import type { ModelProvider } from '@auditlayer/schema';
 
+import type { PiiPatternName } from './pii-patterns.js';
+
+export type { PiiPatternName } from './pii-patterns.js';
+
 export interface LocalStorageConfig {
   type: 'local';
   /** Directory under which JSONL files are written. */
@@ -53,18 +57,6 @@ export interface KmsSigningKeyConfig {
 }
 
 export type SigningKeyConfig = InlineSigningKeyConfig | KmsSigningKeyConfig;
-
-export type PiiPatternName =
-  | 'email'
-  | 'phone'
-  | 'ssn'
-  | 'nhsNumber'
-  | 'euNationalId'
-  | 'ipAddress'
-  | 'creditCard'
-  | 'iban'
-  | 'name'
-  | 'address';
 
 export interface PiiSqliteStoreConfig {
   type: 'sqlite';

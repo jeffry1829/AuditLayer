@@ -2,6 +2,7 @@ import { Command, Option } from 'commander';
 
 import { exportCommand, initCommand, queryCommand, verifyCommand } from './commands.js';
 import { loadConfig, resolveConfig, type ConfigOverrides } from './config.js';
+import { CLI_VERSION } from './version.js';
 
 export interface RunOptions {
   argv?: string[];
@@ -16,7 +17,7 @@ export function buildProgram(runOpts: RunOptions = {}): Command {
     .description(
       'AuditLayer CLI — query, verify, and export hash-chained audit logs for EU AI Act Article 12.',
     )
-    .version('0.1.0', '-v, --version')
+    .version(CLI_VERSION, '-v, --version')
     .addOption(new Option('--config <path>', 'config file path'))
     .addOption(new Option('--system-id <id>', 'override config systemId'))
     .addOption(new Option('--storage-dir <dir>', 'override local storage directory'))
