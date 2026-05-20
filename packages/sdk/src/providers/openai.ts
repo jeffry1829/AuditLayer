@@ -20,7 +20,7 @@ export const OPENAI_OUTPUT_KEYS: readonly string[] = ['choices', 'usage', 'model
 
 type CreateFn = (...args: unknown[]) => Promise<unknown>;
 
-interface OpenAiClient {
+interface OpenAiClient extends Record<string, unknown> {
   chat: { completions: { create: CreateFn } };
 }
 
@@ -45,7 +45,7 @@ function extractOutput(response: unknown, keys: readonly string[]): unknown {
   return response ?? null;
 }
 
-export const openaiAdapter: ProviderAdapter<OpenAiClient> = {
+export const openaiAdapter: ProviderAdapter = {
   providerId: 'openai',
 
   detect(client: object): boolean {
@@ -55,8 +55,9 @@ export const openaiAdapter: ProviderAdapter<OpenAiClient> = {
     return typeof completions?.['create'] === 'function';
   },
 
-  wrap(audit: ProviderHostLogger, client: OpenAiClient, context: WrapContext): OpenAiClient {
-    const completions = client.chat.completions;
+  wrap(audit: ProviderHostLogger, client: object, context: WrapContext): void {
+    const openai = client as OpenAiClient;
+    const completions = openai.chat.completions;
     const originalCreate = completions.create.bind(completions);
     completions.create = async (...args: unknown[]) => {
       const params = (args[0] as Record<string, unknown>) ?? {};
@@ -87,6 +88,5 @@ export const openaiAdapter: ProviderAdapter<OpenAiClient> = {
         throw err;
       }
     };
-    return client;
   },
 };

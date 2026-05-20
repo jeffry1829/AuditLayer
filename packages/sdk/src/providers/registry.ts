@@ -64,9 +64,9 @@ export function wrapClient<T extends object>(
       { registered: resolveAdapters().map((a) => a.providerId) },
     );
   }
-  return (adapter.wrap as (audit: ProviderHostLogger, client: T, context: WrapContext) => T)(
-    audit,
-    client,
-    context,
-  );
+  // wrap() mutates client in place. The registry returns the caller's
+  // original reference rather than whatever wrap() returns; this preserves
+  // the generic T binding without an unchecked cast.
+  adapter.wrap(audit, client, context);
+  return client;
 }

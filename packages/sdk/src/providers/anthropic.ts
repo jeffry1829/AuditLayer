@@ -23,7 +23,7 @@ export const ANTHROPIC_SNAPSHOT_REGEX = /-(\d{8})$/;
 
 type CreateFn = (...args: unknown[]) => Promise<unknown>;
 
-interface AnthropicClient {
+interface AnthropicClient extends Record<string, unknown> {
   messages: { create: CreateFn };
 }
 
@@ -53,7 +53,7 @@ function extractOutput(response: unknown, keys: readonly string[]): unknown {
   return response ?? null;
 }
 
-export const anthropicAdapter: ProviderAdapter<AnthropicClient> = {
+export const anthropicAdapter: ProviderAdapter = {
   providerId: 'anthropic',
 
   detect(client: object): boolean {
@@ -62,8 +62,9 @@ export const anthropicAdapter: ProviderAdapter<AnthropicClient> = {
     return typeof messages?.['create'] === 'function';
   },
 
-  wrap(audit: ProviderHostLogger, client: AnthropicClient, context: WrapContext): AnthropicClient {
-    const messages = client.messages;
+  wrap(audit: ProviderHostLogger, client: object, context: WrapContext): void {
+    const anthropic = client as AnthropicClient;
+    const messages = anthropic.messages;
     const originalCreate = messages.create.bind(messages);
     messages.create = async (...args: unknown[]) => {
       const params = (args[0] as Record<string, unknown>) ?? {};
@@ -94,6 +95,5 @@ export const anthropicAdapter: ProviderAdapter<AnthropicClient> = {
         throw err;
       }
     };
-    return client;
   },
 };

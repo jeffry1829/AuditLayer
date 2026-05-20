@@ -40,8 +40,15 @@ export interface ProviderHostLogger {
  *
  * Adding a new provider = adding one ProviderAdapter to the registry. No edits
  * to AuditLogger.wrap or detectProvider required.
+ *
+ * Contract notes:
+ * - `detect` MUST be a pure read of the client's shape. No side effects.
+ * - `wrap` MUST mutate the client in place (so the caller keeps its
+ *   reference). It is invoked with the same `client` value that the registry
+ *   handed to `detect`; the registry returns that original reference to
+ *   callers regardless of what `wrap` returns. Returning `void` is fine.
  */
-export interface ProviderAdapter<TClient extends object = object> {
+export interface ProviderAdapter {
   /** Stable identifier matching ModelProvider. */
   readonly providerId: ModelProvider;
 
@@ -50,9 +57,9 @@ export interface ProviderAdapter<TClient extends object = object> {
 
   /**
    * Mutate the client in-place so calls to the provider's generation method
-   * are intercepted. Returns the same client for chaining.
+   * are intercepted. The return value is ignored by the registry.
    */
-  wrap(audit: ProviderHostLogger, client: TClient, context: WrapContext): TClient;
+  wrap(audit: ProviderHostLogger, client: object, context: WrapContext): unknown;
 }
 
 /** Risk flag emitted when a provider call surfaces an error to AuditLayer. */
