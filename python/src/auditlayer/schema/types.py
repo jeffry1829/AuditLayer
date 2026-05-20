@@ -9,6 +9,8 @@ the conformance test suite at the repo root.
 from __future__ import annotations
 
 import re
+from importlib.metadata import PackageNotFoundError
+from importlib.metadata import version as _pkg_version
 from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -16,7 +18,15 @@ from pydantic.alias_generators import to_camel
 
 SCHEMA_VERSION: Literal["auditlayer-v1.0"] = "auditlayer-v1.0"
 SDK_NAME: str = "auditlayer"
-SDK_VERSION: str = "0.1.0"
+# Read from installed-package metadata so SDK_VERSION stays in lockstep with
+# pyproject.toml without parsing the file at import time. Mirrors the TS SDK's
+# `packages/sdk/src/version.ts` strategy. Falls back to a "0+local" sentinel
+# only when the package is not installed (running tests purely from source
+# tree without `pip install -e .`); production deployments always install.
+try:
+    SDK_VERSION: str = _pkg_version(SDK_NAME)
+except PackageNotFoundError:
+    SDK_VERSION = "0+local"
 
 _SHA256_HEX = re.compile(r"^[0-9a-f]{64}$")
 _ISO_DATETIME = re.compile(
