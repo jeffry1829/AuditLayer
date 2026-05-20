@@ -12,14 +12,26 @@
  */
 import { z } from 'zod';
 
-import { ALL_PII_PATTERN_NAMES } from './pii-patterns.js';
+import { PII_PATTERN_NAME_TUPLE } from './pii-patterns.js';
 
-const safeIdentifier = z.string().min(1);
+/**
+ * Path-segment-safe identifier. Mirrors the runtime regex in ``util.ts``'s
+ * ``assertSafePathSegment`` so config files are rejected at parse time, not
+ * later at AuditLogger construction time.
+ */
+const SAFE_IDENTIFIER_REGEX = /^[A-Za-z0-9._-]+$/;
+const safePathSegment = z
+  .string()
+  .min(1)
+  .regex(SAFE_IDENTIFIER_REGEX, 'must match /^[A-Za-z0-9._-]+$/')
+  .refine((s) => s !== '.' && s !== '..', { message: "must not be '.' or '..'" });
+
+const nonEmptyString = z.string().min(1);
 
 export const LocalStorageConfigSchema = z
   .object({
     type: z.literal('local'),
-    dir: safeIdentifier,
+    dir: nonEmptyString,
     rotateBy: z.enum(['hour', 'day']).optional(),
   })
   .strict();
@@ -27,8 +39,8 @@ export const LocalStorageConfigSchema = z
 export const S3StorageConfigSchema = z
   .object({
     type: z.literal('s3'),
-    bucket: safeIdentifier,
-    region: safeIdentifier,
+    bucket: nonEmptyString,
+    region: nonEmptyString,
     prefix: z.string().optional(),
     workMode: z.boolean().optional(),
     endpoint: z.string().url().optional(),
@@ -54,7 +66,7 @@ export const HashChainConfigSchema = z
   })
   .strict();
 
-const piiPatternEnum = z.enum(ALL_PII_PATTERN_NAMES as unknown as [string, ...string[]]);
+const piiPatternEnum = z.enum(PII_PATTERN_NAME_TUPLE);
 
 export const PiiTokenStoreConfigSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('memory') }).strict(),
@@ -79,7 +91,7 @@ export const PiiRedactionConfigSchema = z
  */
 export const FileBackedAuditConfigSchema = z
   .object({
-    systemId: safeIdentifier,
+    systemId: safePathSegment,
     storage: StorageConfigSchema,
     retention: RetentionConfigSchema.optional(),
     hashChain: HashChainConfigSchema.optional(),

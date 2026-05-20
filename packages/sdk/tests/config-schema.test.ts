@@ -55,6 +55,25 @@ describe('FileBackedAuditConfigSchema', () => {
     });
     expect(r.success).toBe(false);
   });
+
+  it('rejects systemId that fails the path-segment regex', () => {
+    // Defense in depth: the SDK constructor also calls assertSafePathSegment,
+    // but the Zod schema MUST reject the same inputs so CLI configs fail at
+    // parse time, before any backend is constructed.
+    for (const bad of ['../escape', '.', '..', 'with space', 'with/slash', 'with:colon']) {
+      const r = FileBackedAuditConfigSchema.safeParse({
+        systemId: bad,
+        storage: { type: 'local', dir: '/tmp' },
+      });
+      expect(r.success).toBe(false);
+    }
+    // Sanity: a clean identifier passes.
+    const ok = FileBackedAuditConfigSchema.safeParse({
+      systemId: 'sys-1_demo.app',
+      storage: { type: 'local', dir: '/tmp' },
+    });
+    expect(ok.success).toBe(true);
+  });
 });
 
 describe('StorageConfigSchema', () => {

@@ -120,3 +120,12 @@ export const DEFAULT_PII_PATTERNS: Readonly<Record<PiiPatternName, RegExp>> = Ob
 export const ALL_PII_PATTERN_NAMES: readonly PiiPatternName[] = Object.freeze(
   Object.keys(PII_PATTERN_REGISTRY) as PiiPatternName[],
 );
+
+/**
+ * Non-empty tuple shape for Zod's ``z.enum``, derived from the registry.
+ * Exported so the config schema does not have to cast.
+ */
+export const PII_PATTERN_NAME_TUPLE = ALL_PII_PATTERN_NAMES as readonly [
+  PiiPatternName,
+  ...PiiPatternName[],
+];
