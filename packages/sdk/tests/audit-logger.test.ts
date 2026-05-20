@@ -8,11 +8,7 @@ import { verifyChain } from '@auditlayer/schema';
 
 import { AuditLogger } from '../src/audit-logger.js';
 import { LocalStorageBackend } from '../src/backends/local.js';
-import {
-  AuditLayerLifecycleError,
-  AuditLayerProviderError,
-  ERROR_CODES,
-} from '../src/errors.js';
+import { AuditLayerLifecycleError, AuditLayerProviderError, ERROR_CODES } from '../src/errors.js';
 
 const TEST_SECRET = 'test-secret-key-with-enough-length-1234567890';
 
