@@ -87,16 +87,16 @@ async function main() {
       { messages: { create: mockAnthropic.messages.create } },
       {
         caseId: c.id,
-        promptTemplateId: 'resume-scoring-v3',
-        promptTemplateVersion: '3.2.1',
+        promptTemplateId: RESUME_SCORING.promptTemplateId,
+        promptTemplateVersion: RESUME_SCORING.promptTemplateVersion,
         operatorId: 'system',
       },
     );
 
     const resp = await scoped.messages.create({
-      model: 'claude-3-5-sonnet-20241022',
-      max_tokens: 256,
-      temperature: 0.1,
+      model: RESUME_SCORING.modelName,
+      max_tokens: RESUME_SCORING.modelMaxTokens,
+      temperature: RESUME_SCORING.modelTemperature,
       messages: [
         {
           role: 'user',
