@@ -8,7 +8,11 @@ import { verifyChain } from '@auditlayer/schema';
 
 import { AuditLogger } from '../src/audit-logger.js';
 import { LocalStorageBackend } from '../src/backends/local.js';
-import { AuditLayerProviderError, ERROR_CODES } from '../src/errors.js';
+import {
+  AuditLayerLifecycleError,
+  AuditLayerProviderError,
+  ERROR_CODES,
+} from '../src/errors.js';
 
 const TEST_SECRET = 'test-secret-key-with-enough-length-1234567890';
 
@@ -92,9 +96,15 @@ describe('AuditLogger', () => {
     await audit.close();
   });
 
-  it('rejects endCall for unknown callId', async () => {
+  it('rejects endCall for unknown callId with AuditLayerLifecycleError', async () => {
     const audit = makeLogger(dir);
-    await expect(audit.endCall('unknown', {})).rejects.toThrow(/pending set/);
+    try {
+      await audit.endCall('unknown', {});
+      throw new Error('expected endCall to throw');
+    } catch (err) {
+      expect(err).toBeInstanceOf(AuditLayerLifecycleError);
+      expect((err as AuditLayerLifecycleError).code).toBe(ERROR_CODES.LOGGER_CALL_NOT_PENDING);
+    }
     await audit.close();
   });
 
