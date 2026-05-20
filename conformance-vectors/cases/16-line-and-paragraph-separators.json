@@ -1,0 +1,13 @@
+{
+  "name": "line-and-paragraph-separators",
+  "description": "U+2028 (LINE SEPARATOR) and U+2029 (PARAGRAPH SEPARATOR) MUST NOT be escaped per ES2019+ JSON.stringify. Empty strings + empty arrays round-trip without artifacts.",
+  "input": {
+    "ls": " ",
+    "ps": " ",
+    "empty": "",
+    "emptyArr": [],
+    "emptyObj": {}
+  },
+  "canonical": "{\"empty\":\"\",\"emptyArr\":[],\"emptyObj\":{},\"ls\":\" \",\"ps\":\" \"}",
+  "sha256": "d3cf9f9e5887ad39f696a5d5d8cf2935b4119701e2d2aa3d3907fa4d7fa03cb8"
+}
