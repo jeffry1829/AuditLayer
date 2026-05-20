@@ -1,4 +1,10 @@
-import { LocalStorageBackend, S3StorageBackend, type StorageBackend } from '@auditlayer/sdk';
+import {
+  AuditLayerConfigError,
+  ERROR_CODES,
+  LocalStorageBackend,
+  S3StorageBackend,
+  type StorageBackend,
+} from '@auditlayer/sdk';
 
 import type { CliConfigStorage } from './config.js';
 
@@ -21,7 +27,11 @@ export function createBackend(storage: CliConfigStorage): StorageBackend {
     default: {
       const _exhaustive: never = storage;
       void _exhaustive;
-      throw new Error('createBackend: unknown storage type');
+      throw new AuditLayerConfigError(
+        ERROR_CODES.CONFIG_UNKNOWN_BACKEND,
+        'createBackend: unknown storage type',
+        { received: storage },
+      );
     }
   }
 }
