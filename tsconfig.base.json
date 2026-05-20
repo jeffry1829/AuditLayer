@@ -20,7 +20,8 @@
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
-    "verbatimModuleSyntax": false
+    "verbatimModuleSyntax": false,
+    "types": ["node"]
   },
   "exclude": ["node_modules", "dist", "**/*.test.ts", "tests"]
 }
