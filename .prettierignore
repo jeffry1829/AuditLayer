@@ -4,3 +4,11 @@ coverage/
 node_modules/
 pnpm-lock.yaml
 *.tsbuildinfo
+
+# Python tooling artifacts — pytest dropping README.md into .pytest_cache/
+# would otherwise trip prettier:check on every local run.
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+python/examples/audit-logs/
+
