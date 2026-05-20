@@ -31,8 +31,7 @@ const audit = new AuditLogger({
   },
   retention: {
     minimumDays: RETENTION_DEFAULTS.deployerMinimumDays,
-    // Health records retention typically 10y; override the SDK default.
-    targetDays: 3650,
+    targetDays: TRIAGE_POLICY.retentionTargetDays,
   },
 });
 
@@ -81,7 +80,7 @@ function triage(p: Patient, policy: TriagePolicyConfig): TriageOutput {
     return {
       triageLevel: 1,
       recommendation: 'immediate',
-      confidence: 0.92,
+      confidence: policy.redFlagLowSpo2Confidence,
       reasonCodes: ['RED_FLAG_SYMPTOM', 'LOW_SPO2'],
     };
   }
@@ -89,7 +88,7 @@ function triage(p: Patient, policy: TriagePolicyConfig): TriageOutput {
     return {
       triageLevel: 2,
       recommendation: 'urgent',
-      confidence: 0.78,
+      confidence: policy.redFlagAloneConfidence,
       reasonCodes: ['RED_FLAG_SYMPTOM'],
     };
   }
@@ -108,9 +107,12 @@ async function main() {
       modelProvider: 'self_hosted',
       modelName: 'triage-cdsm-2026',
       modelVersion: '2.4.1',
-      modelConfiguration: { confidenceThreshold: TRIAGE_POLICY.lowConfidenceThreshold },
+      modelConfiguration: {
+        confidenceThreshold: TRIAGE_POLICY.lowConfidenceThreshold,
+        policyVersion: TRIAGE_POLICY.policyVersion,
+      },
       promptTemplateId: 'triage-policy-v4',
-      promptTemplateVersion: '4.0.0',
+      promptTemplateVersion: TRIAGE_POLICY.policyVersion,
       operatorId: 'cdsm-service',
       referenceDatabase: TRIAGE_POLICY.referenceDatabase,
       input: { ...p },
