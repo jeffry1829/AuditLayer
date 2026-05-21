@@ -16,8 +16,8 @@
     "@auditlayer/sdk": "workspace:^"
   },
   "devDependencies": {
-    "@types/node": "^20.14.0",
+    "@types/node": "^25.9.1",
     "tsx": "^4.16.0",
-    "typescript": "^5.5.0"
+    "typescript": "^6.0.3"
   }
 }
