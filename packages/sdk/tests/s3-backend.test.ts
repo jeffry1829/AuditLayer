@@ -116,6 +116,82 @@ describe('S3StorageBackend', () => {
     expect(out).toHaveLength(0);
   });
 
+  it('sets SSE-KMS headers when kmsKeyId is configured', async () => {
+    const client = new FakeS3Client({ Contents: [] });
+    const backend = new S3StorageBackend(
+      {
+        type: 's3',
+        bucket: 'b',
+        region: 'eu-west-1',
+        kmsKeyId: 'arn:aws:kms:eu-west-1:123:key/abc',
+      },
+      {
+        sdk: {
+          S3Client: FakeS3Client as never,
+          PutObjectCommand: PutObjectCommand as never,
+          GetObjectCommand: GetObjectCommand as never,
+          ListObjectsV2Command: ListObjectsV2Command as never,
+        },
+        client,
+      },
+    );
+    await backend.append(sampleEntry as never, { systemId: 'sys' });
+    const put = client.sent.find((c) => c.name === 'PutObjectCommand');
+    expect(put!.input.ServerSideEncryption).toBe('aws:kms');
+    expect(put!.input.SSEKMSKeyId).toBe('arn:aws:kms:eu-west-1:123:key/abc');
+  });
+
+  it('omits SSE-KMS headers when kmsKeyId is not configured', async () => {
+    const { backend, client } = makeBackend();
+    await backend.append(sampleEntry as never, { systemId: 'sys' });
+    const put = client.sent.find((c) => c.name === 'PutObjectCommand');
+    expect(put!.input.ServerSideEncryption).toBeUndefined();
+    expect(put!.input.SSEKMSKeyId).toBeUndefined();
+  });
+
+  it('skips malformed JSON and schema-invalid lines on list', async () => {
+    // Mixed payload: one clean entry, one malformed JSON line, one valid JSON
+    // that fails AuditLogEntrySchema. Both bad lines must be dropped silently
+    // (with process.emitWarning under the hood) rather than abort iteration.
+    class BadJsonClient {
+      readonly sent: MockCmd[] = [];
+      async send(cmd: MockCmd) {
+        this.sent.push(cmd);
+        if (cmd.name === 'ListObjectsV2Command') {
+          return { Contents: [{ Key: 'sys/2026/05/19/00-bad.json' }], IsTruncated: false };
+        }
+        if (cmd.name === 'GetObjectCommand') {
+          return {
+            Body: {
+              transformToString: async () =>
+                `${JSON.stringify(sampleEntry)}\n{not json\n${JSON.stringify({ schemaVersion: 'wrong' })}\n`,
+            },
+          };
+        }
+        return {};
+      }
+    }
+    const client = new BadJsonClient();
+    const backend = new S3StorageBackend(
+      { type: 's3', bucket: 'b', region: 'eu-west-1' },
+      {
+        sdk: {
+          S3Client: BadJsonClient as never,
+          PutObjectCommand: PutObjectCommand as never,
+          GetObjectCommand: GetObjectCommand as never,
+          ListObjectsV2Command: ListObjectsV2Command as never,
+        },
+        client: client as never,
+      },
+    );
+    const out = [];
+    for await (const entry of backend.list({ systemId: 'sys' })) {
+      out.push(entry);
+    }
+    expect(out).toHaveLength(1);
+    expect(out[0]!.callId).toBe('call-1');
+  });
+
   it('paginates via continuation tokens', async () => {
     class PaginatingS3Client {
       readonly sent: MockCmd[] = [];

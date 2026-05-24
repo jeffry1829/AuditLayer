@@ -82,6 +82,40 @@ describe('provider registry', () => {
     }
   });
 
+  it('anthropic wrap handles a call invoked without arguments', async () => {
+    // args[0] is undefined; the wrapper falls back to {} for params and
+    // records modelName/modelVersion as "unknown" so the entry still
+    // satisfies the schema.
+    const audit = makeLogger();
+    const client = {
+      messages: {
+        create: async () => ({ id: 'msg-empty', content: [] }),
+      },
+    };
+    const wrapped = audit.wrap(client, {
+      caseId: 'case-empty-args',
+      promptTemplateId: 'tpl',
+      promptTemplateVersion: '1.0',
+      operatorId: 'op',
+    });
+    // Cast to call without args.
+    await (wrapped.messages.create as () => Promise<unknown>)();
+    const entries = [];
+    for await (const e of (
+      audit.backend as {
+        list: (opts: {
+          systemId: string;
+        }) => AsyncIterable<{ modelName: string; modelVersion: string }>;
+      }
+    ).list({ systemId: 'sys-prov' })) {
+      entries.push(e);
+    }
+    expect(entries).toHaveLength(1);
+    expect(entries[0]!.modelName).toBe('unknown');
+    expect(entries[0]!.modelVersion).toBe('unknown');
+    await audit.close();
+  });
+
   it('custom adapter registration takes precedence + can be removed', async () => {
     const audit = makeLogger();
     let wrappedCalled = false;

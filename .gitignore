@@ -50,7 +50,11 @@ __pycache__/
 
 # Local session tooling (Claude Code skills / agent state — not part of OSS)
 .agents/
+.remember/
+.claude/
+memory/
 skills-lock.json
+CLAUDE.md.txt
 
 # Personal / pre-public development notes (not part of OSS)
 dev_docs/
