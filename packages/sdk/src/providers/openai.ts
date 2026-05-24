@@ -41,13 +41,17 @@ export const openaiAdapter: ProviderAdapter = {
     const originalCreate = completions.create.bind(completions);
     completions.create = async (...args: unknown[]) => {
       const params = (args[0] as Record<string, unknown>) ?? {};
+      const model = String(params['model'] ?? 'unknown');
       const callId = await audit.startCall({
         caseId: context.caseId,
         sessionId: context.sessionId,
         parentCallId: context.parentCallId,
         modelProvider: 'openai',
-        modelName: String(params['model'] ?? 'unknown'),
-        modelVersion: String(params['model'] ?? ''),
+        modelName: model,
+        // OpenAI doesn't expose a snapshot suffix the way Anthropic does;
+        // fall back to the model id so AuditLogEntryInputSchema's
+        // modelVersion.min(1) constraint is always satisfied.
+        modelVersion: model,
         modelConfiguration: pickKeys(params, OPENAI_CONFIG_KEYS),
         promptTemplateId: context.promptTemplateId,
         promptTemplateVersion: context.promptTemplateVersion,

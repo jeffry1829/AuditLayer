@@ -82,6 +82,38 @@ describe('provider registry', () => {
     }
   });
 
+  it('openai wrap handles a call invoked without arguments', async () => {
+    const audit = makeLogger();
+    const client = {
+      chat: {
+        completions: {
+          create: async () => ({ id: 'cmpl-empty', choices: [] }),
+        },
+      },
+    };
+    const wrapped = audit.wrap(client, {
+      caseId: 'case-openai-empty',
+      promptTemplateId: 'tpl',
+      promptTemplateVersion: '1.0',
+      operatorId: 'op',
+    });
+    await (wrapped.chat.completions.create as () => Promise<unknown>)();
+    const entries = [];
+    for await (const e of (
+      audit.backend as {
+        list: (opts: {
+          systemId: string;
+        }) => AsyncIterable<{ modelName: string; modelProvider: string }>;
+      }
+    ).list({ systemId: 'sys-prov' })) {
+      entries.push(e);
+    }
+    expect(entries).toHaveLength(1);
+    expect(entries[0]!.modelProvider).toBe('openai');
+    expect(entries[0]!.modelName).toBe('unknown');
+    await audit.close();
+  });
+
   it('anthropic wrap handles a call invoked without arguments', async () => {
     // args[0] is undefined; the wrapper falls back to {} for params and
     // records modelName/modelVersion as "unknown" so the entry still
