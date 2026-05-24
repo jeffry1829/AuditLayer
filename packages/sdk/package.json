@@ -71,7 +71,7 @@
   },
   "dependencies": {
     "@vouchrail/schema": "workspace:^",
-    "zod": "^3.23.0"
+    "zod": "^4.4.3"
   },
   "peerDependencies": {
     "@anthropic-ai/sdk": ">=0.20.0",

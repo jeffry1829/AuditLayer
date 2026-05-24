@@ -51,7 +51,7 @@
   "dependencies": {
     "@vouchrail/schema": "workspace:^",
     "@vouchrail/sdk": "workspace:^",
-    "commander": "^12.1.0"
+    "commander": "^14.0.3"
   },
   "devDependencies": {
     "@types/node": "^20.14.0",
