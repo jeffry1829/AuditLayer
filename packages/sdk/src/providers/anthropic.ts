@@ -1,11 +1,7 @@
 import type { WrapContext } from '../config.js';
 
-import { extractOutput, pickKeys } from './shared.js';
-import {
-  PROVIDER_ERROR_RISK_FLAG,
-  type ProviderAdapter,
-  type ProviderHostLogger,
-} from './types.js';
+import { wrapCreate } from './shared.js';
+import type { ProviderAdapter, ProviderHostLogger } from './types.js';
 
 /** Keys forwarded into `modelConfiguration` from the Anthropic request params. */
 export const ANTHROPIC_CONFIG_KEYS: readonly string[] = [
@@ -46,34 +42,15 @@ export const anthropicAdapter: ProviderAdapter = {
     const anthropic = client as AnthropicClient;
     const messages = anthropic.messages;
     const originalCreate = messages.create.bind(messages);
-    messages.create = async (...args: unknown[]) => {
-      const params = (args[0] as Record<string, unknown>) ?? {};
-      const callId = await audit.startCall({
-        caseId: context.caseId,
-        sessionId: context.sessionId,
-        parentCallId: context.parentCallId,
-        modelProvider: 'anthropic',
+    messages.create = wrapCreate(audit, originalCreate, context, {
+      providerId: 'anthropic',
+      configKeys: ANTHROPIC_CONFIG_KEYS,
+      outputKeys: ANTHROPIC_OUTPUT_KEYS,
+      buildModelInfo: (params) => ({
         modelName: String(params['model'] ?? 'unknown'),
         modelVersion: deriveAnthropicModelVersion(String(params['model'] ?? '')),
-        modelConfiguration: pickKeys(params, ANTHROPIC_CONFIG_KEYS),
-        promptTemplateId: context.promptTemplateId,
-        promptTemplateVersion: context.promptTemplateVersion,
-        operatorId: context.operatorId,
-        input: { messages: params['messages'], system: params['system'] },
-      });
-      try {
-        const response = await originalCreate(...args);
-        const output = extractOutput(response, ANTHROPIC_OUTPUT_KEYS);
-        await audit.endCall(callId, { output, outputDecision: output });
-        return response;
-      } catch (err) {
-        await audit.endCall(callId, {
-          output: null,
-          outputDecision: null,
-          riskFlags: [PROVIDER_ERROR_RISK_FLAG],
-        });
-        throw err;
-      }
-    };
+      }),
+      buildInput: (params) => ({ messages: params['messages'], system: params['system'] }),
+    });
   },
 };
