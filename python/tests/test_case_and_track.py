@@ -1,7 +1,4 @@
-"""Tests for ``audit.case()`` context manager + ``@audit.track()`` decorator.
-
-Spec §2.2 Pattern 2 (context manager) and Pattern 4 (decorator) / §2.6.
-"""
+"""Tests for ``audit.case()`` context manager + ``@audit.track()`` decorator."""
 
 from __future__ import annotations
 

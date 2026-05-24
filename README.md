@@ -2,7 +2,7 @@
 
 Tamper-evident audit logs for AI systems. Hash-chained, signed, customer-owned. TypeScript + Python, one chain.
 
-[![CI](https://github.com/vouchrail/vouchrail/actions/workflows/ci.yml/badge.svg)](https://github.com/vouchrail/vouchrail/actions/workflows/ci.yml)
+[![CI](https://github.com/jeffry1829/VouchRail/actions/workflows/ci.yml/badge.svg)](https://github.com/jeffry1829/VouchRail/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
 
 EU AI Act Article 12 kicks in 2 Aug 2026. Every high-risk AI system (HR, credit, insurance, healthcare, education) has to keep reconstructable, tamper-evident logs for 6+ months. Observability tools (Langfuse, Datadog LLM, LangSmith) are built for debugging your model, not for regulators. VouchRail sits next to them and writes the evidence chain.

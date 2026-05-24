@@ -90,10 +90,9 @@ def wrap_client(audit: ProviderHostLogger, client: Any, context: WrapContext) ->
 def wrap_client_async(audit: ProviderHostLogger, client: Any, context: WrapContext) -> Any:
     """Wrap an async ``client`` in place; return the same reference.
 
-    Spec §2.3 requires both sync and async; the async path is identified by
-    ``inspect.iscoroutinefunction`` on the provider's generation method so
-    callers cannot accidentally wrap a sync client with the async path or
-    vice versa.
+    The async path is identified by ``inspect.iscoroutinefunction`` on the
+    provider's generation method so callers cannot accidentally wrap a sync
+    client with the async path or vice versa.
     """
 
     adapter = detect_adapter(client, async_=True)

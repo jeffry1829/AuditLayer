@@ -51,7 +51,7 @@ All packages target Node 18.18+. TypeScript strict mode is required.
 
 ## Marketing / docs discipline
 
-Per spec §13.3, the README, package descriptions, and any public-facing copy
+The README, package descriptions, and any public-facing copy
 **must not** claim:
 
 - "Guaranteed Article 12 compliant"

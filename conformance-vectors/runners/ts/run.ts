@@ -9,8 +9,8 @@
  *                   Used when adding new vectors or after a TS-reference
  *                   schema change (which requires a schemaVersion bump).
  *
- * Per spec §3.4 the TS implementation is the reference; the values written by
- * `generate` are what Python runner asserts against.
+ * The TS implementation is the reference; the values written by
+ * `generate` are what the Python runner asserts against.
  */
 import { createHash } from 'node:crypto';
 import { readFileSync, readdirSync, writeFileSync } from 'node:fs';

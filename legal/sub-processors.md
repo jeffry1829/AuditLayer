@@ -1,11 +1,11 @@
 # Sub-processors (placeholder)
 
 This page lists Sub-processors engaged by VouchRail to provide the
-hosted-service tiers of the Service. The list will be populated and kept
-current per spec §13 and the DPA at [`/legal/dpa.md`](./dpa.md).
+hosted-service tiers of the Service. The list is kept current alongside
+the DPA at [`/legal/dpa.md`](./dpa.md).
 
 > **Status:** Not yet populated. Will be filled in as hosted-service tiers
-> are launched (spec roadmap Month 3–4).
+> launch.
 
 | Sub-processor     | Service provided                           | Location          | Transfer mechanism    |
 | ----------------- | ------------------------------------------ | ----------------- | --------------------- |

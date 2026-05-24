@@ -1,8 +1,8 @@
 # Incident Response Playbook
 
-> Internal-facing playbook required by spec §13.6(D). Documented incident
-> response creates evidence of "duty of care" if VouchRail is sued, and is
-> required by most Tech E&O insurers.
+> Internal-facing playbook. Documented incident response creates evidence
+> of "duty of care" if VouchRail is sued, and is required by most Tech E&O
+> insurers.
 
 ## Severity definitions
 

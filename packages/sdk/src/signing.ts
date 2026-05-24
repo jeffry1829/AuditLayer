@@ -11,6 +11,8 @@ export interface Signer {
   readonly keyId: string;
 }
 
+let inlineSignerWarned = false;
+
 export class InlineSigner implements Signer {
   readonly keyId = SIGNING_DEFAULTS.inlineKeyId;
   constructor(private readonly secret: string) {
@@ -20,6 +22,14 @@ export class InlineSigner implements Signer {
         `InlineSigner: secret must be at least ${SIGNING_DEFAULTS.inlineSecretMinLength} characters. ` +
           'Inline signing is intended for development only; use a KMS signer in production.',
         { minLength: SIGNING_DEFAULTS.inlineSecretMinLength },
+      );
+    }
+    // Warn once per process so dev / test loops stay quiet.
+    if (!inlineSignerWarned && process.env['VOUCHRAIL_SUPPRESS_INLINE_WARNING'] !== '1') {
+      inlineSignerWarned = true;
+      process.emitWarning(
+        'InlineSigner is intended for development only. Use a KMS-backed signer in production.',
+        { code: 'VOUCHRAIL_INLINE_SIGNER' },
       );
     }
   }

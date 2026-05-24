@@ -1,6 +1,6 @@
 # Data Processing Agreement (DPA) — TEMPLATE
 
-> **Status:** Draft template per spec §13 / Appendix D Clause 10.
+> **Status:** Draft template.
 > Must be reviewed by counsel before execution. Defined terms (e.g.,
 > "Personal Data", "Processing", "Sub-processor", "Data Subject",
 > "Supervisory Authority") have the meanings given in Regulation (EU)
@@ -119,7 +119,7 @@ in the Terms of Service.
 
 ## Annex III — Article 12 × GDPR Resolution
 
-The Service implements the pattern described in spec §1.5 and §5.6:
+The Service implements the pseudonymization pattern:
 pseudonymize PII at log time, store the token-to-value lookup separately,
 support justified reveal workflows for regulator review, support GDPR
 erasure of the token store on Controller request. Controller acknowledges

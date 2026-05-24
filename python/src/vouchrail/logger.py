@@ -220,10 +220,10 @@ class AuditLogger(ProviderHostLogger):
     def wrap_async(self, client: Any, context: WrapContext) -> Any:
         """Wrap an async provider client.
 
-        Spec §2.3 requires the async surface to be distinct from ``wrap()``;
-        detection is by ``inspect.iscoroutinefunction`` on the client's
-        generation method so an ``AsyncAnthropic`` cannot be silently
-        downgraded to the sync path or vice versa.
+        The async surface is distinct from ``wrap()``; detection is by
+        ``inspect.iscoroutinefunction`` on the client's generation method
+        so an ``AsyncAnthropic`` cannot be silently downgraded to the
+        sync path or vice versa.
         """
 
         return wrap_client_async(self, client, context)
@@ -246,7 +246,7 @@ class AuditLogger(ProviderHostLogger):
         session_id: str | None = None,
         parent_call_id: str | None = None,
     ) -> Iterator[WrapContext]:
-        """Spec §2.2 Pattern 2: scoped audit context.
+        """Scoped audit context.
 
         Usage::
 
@@ -278,7 +278,7 @@ class AuditLogger(ProviderHostLogger):
         prompt_template_id: str = "default",
         prompt_template_version: str = "1.0.0",
     ) -> Callable[[Callable[..., _R]], Callable[..., _R]]:
-        """Spec §2.6 decorator: ``@audit.track(case_id_from=lambda x: x.id)``.
+        """``@audit.track(case_id_from=lambda x: x.id)`` decorator.
 
         The decorated function executes inside an audit context whose
         ``case_id`` is derived from the function's arguments via

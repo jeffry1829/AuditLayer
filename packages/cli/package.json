@@ -4,14 +4,14 @@
   "description": "VouchRail CLI — query, verify, and export hash-chained audit logs. Verification works offline (no VouchRail cloud required).",
   "license": "Apache-2.0",
   "author": "VouchRail Contributors",
-  "homepage": "https://github.com/vouchrail/vouchrail/tree/main/packages/cli",
+  "homepage": "https://github.com/jeffry1829/VouchRail/tree/main/packages/cli",
   "repository": {
     "type": "git",
-    "url": "https://github.com/vouchrail/vouchrail.git",
+    "url": "https://github.com/jeffry1829/VouchRail.git",
     "directory": "packages/cli"
   },
   "bugs": {
-    "url": "https://github.com/vouchrail/vouchrail/issues"
+    "url": "https://github.com/jeffry1829/VouchRail/issues"
   },
   "keywords": [
     "eu-ai-act",

@@ -1,4 +1,4 @@
-"""Async wrap tests — spec §2.3 MUST."""
+"""Async wrap tests."""
 
 from __future__ import annotations
 

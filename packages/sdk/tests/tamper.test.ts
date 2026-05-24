@@ -40,7 +40,7 @@ async function generateChain(audit: AuditLogger, n: number): Promise<AuditLogEnt
   return out;
 }
 
-describe('tamper-test (Phase 1 MVP definition of done — spec §6.3)', () => {
+describe('tamper-test', () => {
   let dir: string;
   beforeEach(() => {
     dir = mkdtempSync(join(tmpdir(), 'vouchrail-tamper-'));

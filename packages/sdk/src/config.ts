@@ -26,6 +26,12 @@ export interface S3StorageConfig {
   workMode?: boolean;
   /** Optional explicit endpoint for S3-compatible services. */
   endpoint?: string;
+  /**
+   * Optional KMS key id for SSE-KMS server-side encryption. When set, every
+   * PutObject is tagged with `ServerSideEncryption: aws:kms` and the supplied
+   * key id. Omit to inherit the bucket's default encryption.
+   */
+  kmsKeyId?: string;
 }
 
 export type StorageConfig = LocalStorageConfig | S3StorageConfig;

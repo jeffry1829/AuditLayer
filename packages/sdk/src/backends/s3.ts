@@ -50,11 +50,13 @@ export class S3StorageBackend implements StorageBackend {
   private readonly prefix: string;
   private readonly client: S3Client;
   private readonly sdk: S3Module;
+  private readonly kmsKeyId: string | undefined;
 
   constructor(config: S3StorageConfig, deps: S3BackendDeps = {}) {
     this.sdk = deps.sdk ?? loadAwsSdk();
     this.bucket = config.bucket;
     this.prefix = config.prefix ? config.prefix.replace(/\/$/, '') : '';
+    this.kmsKeyId = config.kmsKeyId;
     this.client =
       deps.client ??
       new this.sdk.S3Client({
@@ -68,15 +70,18 @@ export class S3StorageBackend implements StorageBackend {
     assertSafePathSegment(entry.callId, 'callId');
     const key = this.keyFor(opts.systemId, entry.callId, new Date(entry.startedAt));
     const body = JSON.stringify(entry);
-    await this.client.send(
-      new this.sdk.PutObjectCommand({
-        Bucket: this.bucket,
-        Key: key,
-        Body: body,
-        ContentType: STORAGE_DEFAULTS.s3ContentType,
-        ChecksumAlgorithm: STORAGE_DEFAULTS.s3ChecksumAlgorithm,
-      }),
-    );
+    const put: Record<string, unknown> = {
+      Bucket: this.bucket,
+      Key: key,
+      Body: body,
+      ContentType: STORAGE_DEFAULTS.s3ContentType,
+      ChecksumAlgorithm: STORAGE_DEFAULTS.s3ChecksumAlgorithm,
+    };
+    if (this.kmsKeyId) {
+      put['ServerSideEncryption'] = 'aws:kms';
+      put['SSEKMSKeyId'] = this.kmsKeyId;
+    }
+    await this.client.send(new this.sdk.PutObjectCommand(put));
   }
 
   async *list(opts: QueryOptions): AsyncIterable<AuditLogEntry> {
@@ -111,11 +116,21 @@ export class S3StorageBackend implements StorageBackend {
           let parsed: unknown;
           try {
             parsed = JSON.parse(t);
-          } catch {
+          } catch (err) {
+            process.emitWarning(
+              `S3StorageBackend: malformed JSON in ${k} — skipping line (${(err as Error).message})`,
+              { code: ERROR_CODES.STORAGE_BAD_JSON },
+            );
             continue;
           }
           const result = AuditLogEntrySchema.safeParse(parsed);
-          if (!result.success) continue;
+          if (!result.success) {
+            process.emitWarning(
+              `S3StorageBackend: entry failed schema validation in ${k} — skipping`,
+              { code: ERROR_CODES.STORAGE_BAD_SCHEMA },
+            );
+            continue;
+          }
           const entry = result.data;
           if (opts.caseId && entry.caseId !== opts.caseId) continue;
           if (opts.from && entry.startedAt < opts.from) continue;

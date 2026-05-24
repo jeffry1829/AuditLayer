@@ -1,6 +1,6 @@
 # Security Posture
 
-> Public-facing security policy required by spec §13.6.E and Appendix D.
+> Public-facing security policy.
 > This page describes the operating state and roadmap; the **technical
 > vulnerability disclosure channel** is at the repo root in
 > [`/SECURITY.md`](../SECURITY.md).
@@ -9,14 +9,13 @@
 
 - **Customer owns the chain.** VouchRail's design assumes the customer
   ultimately owns, controls, and verifies its own audit log evidence.
-  The Software writes to customer-controlled storage by default
-  (spec §5.5).
+  The Software writes to customer-controlled storage by default.
 - **Signing keys live outside the agent.** The signing key for hash-chain
   signatures must be configured to come from a KMS (AWS KMS, GCP KMS,
-  HashiCorp Vault) with sign-only permission (spec §5.4). The Software
-  exposes a KMS-pluggable interface.
+  HashiCorp Vault) with sign-only permission. The Software exposes a
+  KMS-pluggable interface.
 - **Stateless verification.** The `vouchrail verify` CLI operates offline
-  and does not depend on VouchRail's hosted services (spec §13.6.B).
+  and does not depend on VouchRail's hosted services.
 - **Honest disclosure.** Known limitations are public; see
   [`/legal/limitations.md`](./limitations.md).
 

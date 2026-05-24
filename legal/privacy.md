@@ -1,6 +1,6 @@
 # Privacy Policy — TEMPLATE (Attorney Review Required)
 
-> **Status:** Draft template for attorney review per spec §13.
+> **Status:** Draft template for attorney review.
 > **Do not** use as binding policy without review by counsel familiar with
 > GDPR (EU), UK GDPR, CCPA/CPRA (California), and applicable APAC privacy law.
 
@@ -74,7 +74,7 @@ For audit-log content recorded by the Software, exercise these rights with
 the **Customer** that operates the AI system, not VouchRail; VouchRail
 will forward applicable requests under the DPA.
 
-## 7. Article 12 × GDPR interaction _(spec §1.5)_
+## 7. Article 12 × GDPR interaction
 
 The VouchRail Software is designed to support the simultaneous obligations
 of EU AI Act Article 12 (retention of audit records ≥ 6 months) and GDPR

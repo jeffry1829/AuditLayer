@@ -1,7 +1,7 @@
 # Known Limitations
 
-> Public Known Limitations page required by spec §13.6(E). Counter-intuitively,
-> publishing limitations **reduces** legal exposure compared to silence.
+> Counter-intuitively, publishing limitations **reduces** legal exposure
+> compared to silence.
 
 VouchRail is infrastructure that supports — but does not guarantee — Article 12
 compliance and audit-readiness. The following limitations are intentional and
@@ -58,11 +58,10 @@ in their application layer.
 
 ## 8. Article 12 × GDPR resolution is a pattern, not a guarantee
 
-Spec §5.6 describes the pseudonymize-with-token-escrow pattern as a way to
-reconcile Article 12 retention with GDPR erasure obligations. The Software
-implements the pattern; whether a particular regulator (CNIL, ICO, BfDI, etc.)
-accepts the pattern as sufficient under both regimes in a particular case is
-not guaranteed.
+The Software implements the pseudonymize-with-token-escrow pattern to
+reconcile Article 12 retention with GDPR erasure obligations. Whether a
+particular regulator (CNIL, ICO, BfDI, etc.) accepts the pattern as
+sufficient under both regimes in a particular case is not guaranteed.
 
 ## 9. Framework integrations may lag framework releases
 
@@ -80,9 +79,9 @@ verifiable under the latest CLI. Migration tooling will be provided.
 ## 11. SOC 2 / ISO certifications
 
 In MVP / Phase 1, VouchRail has not completed SOC 2 Type 1, SOC 2 Type 2,
-or ISO/IEC 27001 certification. These are roadmap items (spec Phase 2, months
-5–8). The Apache 2.0 open-source Software does not require these certifications
-to be used self-hosted by Customer.
+or ISO/IEC 27001 certification. These are roadmap items. The Apache 2.0
+open-source Software does not require these certifications to be used
+self-hosted by Customer.
 
 ## 12. Geographic scope
 

@@ -1,6 +1,6 @@
 # Acceptable Use Policy — TEMPLATE
 
-> Draft per Appendix D. Attorney review required.
+> Draft. Attorney review required.
 
 **Effective Date:** `[to be filled]`
 
