@@ -30,7 +30,8 @@ Please include:
 | Public disclosure (coordinated)               | after fix is shipped and customers are notified |
 | Post-mortem                                   | within 7 days of disclosure                     |
 
-These targets follow the incident response posture described in spec §13.6(D).
+These targets follow the incident response posture in
+[`/legal/incident-response.md`](./legal/incident-response.md).
 
 ## Scope
 
@@ -48,8 +49,7 @@ In scope:
 Out of scope:
 
 - Hypothetical scenarios that require an attacker who already holds the
-  signing key. Signing-key custody is the customer's responsibility (see
-  spec §5.4); we recommend KMS-backed keys with sign-only permission.
+  signing key. Signing-key custody is the customer's responsibility; we recommend KMS-backed keys with sign-only permission.
 - Customer misconfiguration (missing Object Lock, retention shorter than
   regulatory minimum, etc.). The CLI and SDK warn about these conditions
   but do not enforce them on the customer's storage.

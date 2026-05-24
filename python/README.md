@@ -70,8 +70,6 @@ await anthropic.messages.create(...)
 
 ## Context manager + decorator
 
-Spec §2.2 patterns 2 and 4:
-
 ```python
 # Context manager — supplies a WrapContext for a single case
 with audit.case(case_id="candidate-12345", operator_id="system") as ctx:

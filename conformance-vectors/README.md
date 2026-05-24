@@ -1,8 +1,8 @@
 # VouchRail Cross-Language Conformance Vectors
 
-Per spec §3.3 (cross-language hash compatibility), this directory carries
-JSON test vectors that both the TypeScript SDK and the Python SDK MUST
-canonicalize to byte-identical output and SHA-256 to byte-identical hex.
+Cross-language hash compatibility test vectors. Both the TypeScript SDK
+and the Python SDK MUST canonicalize each input to byte-identical output
+and SHA-256 to byte-identical hex.
 
 Adding a new vector = adding one file under `cases/`. Both runners pick it up
 automatically.
@@ -23,9 +23,9 @@ The `input` field is JSON-loaded by the runner and fed to the SDK's
 `canonicalize` function. The runner then asserts the canonical output and the
 hash match the file's `canonical` / `sha256` exactly.
 
-## Coverage requirements
+## Coverage
 
-Per spec §3.3, vectors include:
+Vectors include:
 
 - empty primitives (`null`, `true`, `false`, `0`, `""`)
 - integers across safe-integer boundary
@@ -38,10 +38,10 @@ Per spec §3.3, vectors include:
 
 When TS implementation behavior changes, the canonical/sha256 expected values
 must be re-generated and the schema version field in every published entry
-bumped accordingly (see spec §3.4).
+bumped accordingly.
 
 ## Reference implementation
 
-When in doubt, TypeScript SDK is the reference (spec §3.4). The vector
+When in doubt, TypeScript SDK is the reference. The vector
 `canonical` + `sha256` values in this directory are derived from the TS
 implementation; Python SDK conforms to them, not the other way around.

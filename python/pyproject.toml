@@ -52,9 +52,9 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/vouchrail/vouchrail"
-Repository = "https://github.com/vouchrail/vouchrail"
-Issues = "https://github.com/vouchrail/vouchrail/issues"
+Homepage = "https://github.com/jeffry1829/VouchRail"
+Repository = "https://github.com/jeffry1829/VouchRail"
+Issues = "https://github.com/jeffry1829/VouchRail/issues"
 
 [project.scripts]
 vouchrail = "vouchrail.cli.main:main"

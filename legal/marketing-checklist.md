@@ -1,8 +1,8 @@
 # Marketing Language Audit Checklist
 
-> Internal checklist per spec §13.3 + Appendix D. Apply to every public
-> piece of content (README, website, blog, sales emails, conference talks,
-> GitHub release notes, partner submissions) before publication.
+> Internal checklist. Apply to every public piece of content (README,
+> website, blog, sales emails, conference talks, GitHub release notes,
+> partner submissions) before publication.
 
 ## Phrases to NEVER use
 
@@ -38,7 +38,7 @@
 - [ ] All performance numbers cited with the test methodology in a footnote
 - [ ] All deadline / penalty references cite the regulation text
 
-## SLA-specific language _(spec §13.4)_
+## SLA-specific language
 
 - [ ] **Do not promise**: "audit logs are written within 5 seconds"
       **Do promise**: "audit logs are recorded asynchronously and typically
@@ -53,5 +53,5 @@ Each release / publication that contains marketing claims must have:
 
 - [ ] Author of the copy
 - [ ] Reviewer (cross-check against this list)
-- [ ] If first content of its type, attorney review (spec §13.3)
+- [ ] If first content of its type, attorney review
 - [ ] Date of review

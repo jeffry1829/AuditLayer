@@ -1,6 +1,6 @@
 """Pydantic models — Python ergonomics for ``AuditLogEntry``.
 
-Per spec §2.5, on-disk JSON stays camelCase (byte-compat with TS SDK); Python
+On-disk JSON stays camelCase (byte-compat with TS SDK); Python
 attributes are snake_case via Pydantic's ``alias_generator``. The on-the-wire
 contract is owned by ``packages/schema`` (TypeScript) and validated through
 the conformance test suite at the repo root.

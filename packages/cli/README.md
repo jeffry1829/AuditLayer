@@ -10,7 +10,6 @@ compliance officers to:
 
 **Offline by design.** The `verify` command runs entirely against the
 configured storage backend; no VouchRail cloud connection is required.
-This is the property described in spec §13.6.B.
 
 ## Install
 

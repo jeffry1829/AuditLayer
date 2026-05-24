@@ -109,14 +109,15 @@ await audit.endCall(callId, {
 
 Default strategy is **`pseudonymize`** — PII fields are replaced with
 opaque tokens at log time and the token-to-value lookup is stored in a
-SEPARATE token store (SQLite by default). This is the pattern described in
-spec §5.6 to reconcile EU AI Act Article 12 retention with GDPR erasure.
+SEPARATE token store (SQLite by default). This reconciles EU AI Act
+Article 12 retention with GDPR erasure: the audit chain stays intact
+while the token store is deletable on request.
 
 ## Signing keys
 
 The SDK accepts a pluggable `signingKey` configuration. For production,
 configure a KMS-backed signer with **sign-only** permission so that the
-agent service can never export the key material (spec §5.4).
+agent service can never export the key material.
 
 ## Disclaimer
 

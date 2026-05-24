@@ -4,14 +4,14 @@
   "description": "VouchRail SDK — wrap LLM and agent framework calls to produce Article 12-compliant, tamper-evident audit logs.",
   "license": "Apache-2.0",
   "author": "VouchRail Contributors",
-  "homepage": "https://github.com/vouchrail/vouchrail/tree/main/packages/sdk",
+  "homepage": "https://github.com/jeffry1829/VouchRail/tree/main/packages/sdk",
   "repository": {
     "type": "git",
-    "url": "https://github.com/vouchrail/vouchrail.git",
+    "url": "https://github.com/jeffry1829/VouchRail.git",
     "directory": "packages/sdk"
   },
   "bugs": {
-    "url": "https://github.com/vouchrail/vouchrail/issues"
+    "url": "https://github.com/jeffry1829/VouchRail/issues"
   },
   "keywords": [
     "eu-ai-act",

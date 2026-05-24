@@ -4,14 +4,14 @@
   "description": "VouchRail audit log schema, Zod validators, JCS canonicalization, and SHA-256 hash chain helpers. Designed to support EU AI Act Article 12 record-keeping.",
   "license": "Apache-2.0",
   "author": "VouchRail Contributors",
-  "homepage": "https://github.com/vouchrail/vouchrail/tree/main/packages/schema",
+  "homepage": "https://github.com/jeffry1829/VouchRail/tree/main/packages/schema",
   "repository": {
     "type": "git",
-    "url": "https://github.com/vouchrail/vouchrail.git",
+    "url": "https://github.com/jeffry1829/VouchRail.git",
     "directory": "packages/schema"
   },
   "bugs": {
-    "url": "https://github.com/vouchrail/vouchrail/issues"
+    "url": "https://github.com/jeffry1829/VouchRail/issues"
   },
   "keywords": [
     "eu-ai-act",

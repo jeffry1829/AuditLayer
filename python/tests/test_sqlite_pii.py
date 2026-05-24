@@ -1,4 +1,4 @@
-"""Tests for ``SqlitePiiTokenStore``. Spec §2.1 listed it under pii/token_store/."""
+"""Tests for ``SqlitePiiTokenStore``."""
 
 from __future__ import annotations
 
