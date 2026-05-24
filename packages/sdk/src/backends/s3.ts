@@ -47,7 +47,6 @@ export interface S3BackendDeps {
 
 export class S3StorageBackend implements StorageBackend {
   private readonly bucket: string;
-  private readonly region: string;
   private readonly prefix: string;
   private readonly client: S3Client;
   private readonly sdk: S3Module;
@@ -55,7 +54,6 @@ export class S3StorageBackend implements StorageBackend {
   constructor(config: S3StorageConfig, deps: S3BackendDeps = {}) {
     this.sdk = deps.sdk ?? loadAwsSdk();
     this.bucket = config.bucket;
-    this.region = config.region;
     this.prefix = config.prefix ? config.prefix.replace(/\/$/, '') : '';
     this.client =
       deps.client ??

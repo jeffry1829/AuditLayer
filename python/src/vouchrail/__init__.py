@@ -91,15 +91,6 @@ __all__ = [
     "SIGNING_DEFAULTS",
     # Defaults
     "STORAGE_DEFAULTS",
-    "VouchRailConfigError",
-    # Errors
-    "VouchRailError",
-    "VouchRailLifecycleError",
-    "VouchRailPiiError",
-    "VouchRailProviderError",
-    "VouchRailSchemaError",
-    "VouchRailSignerError",
-    "VouchRailStorageError",
     "AuditLogEntry",
     "AuditLogEntryInput",
     # Core SDK
@@ -118,6 +109,15 @@ __all__ = [
     "SqlitePiiTokenStore",
     # Storage
     "StorageBackend",
+    "VouchRailConfigError",
+    # Errors
+    "VouchRailError",
+    "VouchRailLifecycleError",
+    "VouchRailPiiError",
+    "VouchRailProviderError",
+    "VouchRailSchemaError",
+    "VouchRailSignerError",
+    "VouchRailStorageError",
     "WrapContext",
     # Util
     "assert_safe_path_segment",
