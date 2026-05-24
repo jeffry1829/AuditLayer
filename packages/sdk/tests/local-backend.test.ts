@@ -1,5 +1,4 @@
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -7,6 +6,8 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { SCHEMA_VERSION } from '@vouchrail/schema';
 
 import { LocalStorageBackend } from '../src/backends/local.js';
+
+import { mkTmpAuditDir } from './_helpers.js';
 
 const cleanEntry = {
   schemaVersion: SCHEMA_VERSION,
@@ -36,7 +37,7 @@ const cleanEntry = {
 describe('LocalStorageBackend list() bad-line handling', () => {
   let dir: string;
   beforeEach(() => {
-    dir = mkdtempSync(join(tmpdir(), 'vouchrail-local-ts-'));
+    dir = mkTmpAuditDir('local-ts-');
   });
   afterEach(() => {
     rmSync(dir, { recursive: true, force: true });

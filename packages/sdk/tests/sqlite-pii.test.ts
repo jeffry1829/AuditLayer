@@ -1,16 +1,17 @@
-import { mkdtempSync, rmSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { rmSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { SqlitePiiTokenStore } from '../src/pii.js';
 
+import { mkTmpAuditDir } from './_helpers.js';
+
 describe('SqlitePiiTokenStore', () => {
   let dir: string;
   let dbPath: string;
   beforeEach(() => {
-    dir = mkdtempSync(join(tmpdir(), 'vouchrail-sqlite-'));
+    dir = mkTmpAuditDir('sqlite-');
     dbPath = join(dir, 'pii.sqlite');
   });
   afterEach(() => {

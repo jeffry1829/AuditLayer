@@ -1,10 +1,7 @@
-import { mkdtempSync, rmSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { rmSync } from 'node:fs';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { AuditLogger } from '../src/audit-logger.js';
 import { VouchRailProviderError, ERROR_CODES } from '../src/errors.js';
 import {
   ANTHROPIC_SNAPSHOT_REGEX,
@@ -20,13 +17,13 @@ import {
   unregisterProvider,
 } from '../src/providers/index.js';
 
-const TEST_SECRET = 'test-secret-key-with-enough-length-1234567890';
+import { makeLocalLogger, mkTmpAuditDir } from './_helpers.js';
 
 describe('provider registry', () => {
   let dir: string;
 
   beforeEach(() => {
-    dir = mkdtempSync(join(tmpdir(), 'al-prov-'));
+    dir = mkTmpAuditDir('prov-');
   });
 
   afterEach(() => {
@@ -34,10 +31,8 @@ describe('provider registry', () => {
   });
 
   function makeLogger() {
-    return new AuditLogger({
+    return makeLocalLogger(dir, {
       systemId: 'sys-prov',
-      storage: { type: 'local', dir },
-      signingKey: { kind: 'inline', secret: TEST_SECRET },
       hashChain: { enabled: true, algorithm: 'sha256' },
       piiRedaction: { enabled: false, strategy: 'pseudonymize' },
     });

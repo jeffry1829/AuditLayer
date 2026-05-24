@@ -1,5 +1,4 @@
-import { mkdtempSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -10,7 +9,7 @@ import { AuditLogger } from '../src/audit-logger.js';
 import { LocalStorageBackend } from '../src/backends/local.js';
 import { STORAGE_DEFAULTS } from '../src/defaults.js';
 
-const TEST_SECRET = 'test-secret-key-with-enough-length-1234567890';
+import { makeLocalLogger, mkTmpAuditDir } from './_helpers.js';
 
 function walk(dir: string): string[] {
   const out: string[] = [];
@@ -43,17 +42,15 @@ async function generateChain(audit: AuditLogger, n: number): Promise<AuditLogEnt
 describe('tamper-test', () => {
   let dir: string;
   beforeEach(() => {
-    dir = mkdtempSync(join(tmpdir(), 'vouchrail-tamper-'));
+    dir = mkTmpAuditDir('tamper-');
   });
   afterEach(() => {
     rmSync(dir, { recursive: true, force: true });
   });
 
   it('generates 100 entries, modifies entry 50, verify identifies tampering at index 50', async () => {
-    const audit = new AuditLogger({
+    const audit = makeLocalLogger(dir, {
       systemId: 'sys-tamper',
-      storage: { type: 'local', dir },
-      signingKey: { kind: 'inline', secret: TEST_SECRET },
       hashChain: { enabled: true, algorithm: 'sha256' },
     });
     const originalEntries = await generateChain(audit, 100);

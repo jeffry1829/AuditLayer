@@ -1,39 +1,27 @@
-import { mkdtempSync, rmSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { createHash } from 'node:crypto';
+import { rmSync } from 'node:fs';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { verifyChain } from '@vouchrail/schema';
+import { canonicalize, verifyChain } from '@vouchrail/schema';
 
 import { AuditLogger } from '../src/audit-logger.js';
 import { LocalStorageBackend } from '../src/backends/local.js';
 import { VouchRailLifecycleError, VouchRailProviderError, ERROR_CODES } from '../src/errors.js';
 
-const TEST_SECRET = 'test-secret-key-with-enough-length-1234567890';
+import { TEST_SECRET, collectAll, makeLocalLogger, mkTmpAuditDir } from './_helpers.js';
 
 function makeLogger(dir: string) {
-  return new AuditLogger({
-    systemId: 'sys-test',
-    storage: { type: 'local', dir },
-    signingKey: { kind: 'inline', secret: TEST_SECRET },
+  return makeLocalLogger(dir, {
     hashChain: { enabled: true, algorithm: 'sha256' },
     piiRedaction: { enabled: false, strategy: 'pseudonymize' },
   });
 }
 
-async function collectAll(backend: LocalStorageBackend, systemId: string) {
-  const out = [];
-  for await (const entry of backend.list({ systemId })) {
-    out.push(entry);
-  }
-  return out;
-}
-
 describe('AuditLogger', () => {
   let dir: string;
   beforeEach(() => {
-    dir = mkdtempSync(join(tmpdir(), 'vouchrail-'));
+    dir = mkTmpAuditDir('audit-');
   });
   afterEach(() => {
     rmSync(dir, { recursive: true, force: true });
@@ -284,8 +272,6 @@ describe('AuditLogger', () => {
       outputDecision: { score: 7.5, recommended: true },
     });
     expect(entry.outputDecision).toEqual({ score: 7.5, recommended: true });
-    const { canonicalize } = await import('@vouchrail/schema');
-    const { createHash } = await import('node:crypto');
     const expected = createHash('sha256')
       .update(canonicalize(entry.outputDecision ?? null), 'utf8')
       .digest('hex');

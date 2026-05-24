@@ -10,6 +10,7 @@ const SHA256_HEX_REGEX = /^[0-9a-f]{64}$/;
 
 const isoDateTime = z.string().regex(ISO_DATETIME_REGEX, 'must be ISO-8601 UTC');
 const sha256Hex = z.string().regex(SHA256_HEX_REGEX, 'must be 64-char lowercase hex');
+const nonEmptyString = z.string().min(1);
 
 export const ModelProviderEnum = z.union([
   z.literal('anthropic'),
@@ -17,7 +18,7 @@ export const ModelProviderEnum = z.union([
   z.literal('google'),
   z.literal('azure'),
   z.literal('self_hosted'),
-  z.string().min(1),
+  nonEmptyString,
 ]);
 export type ModelProvider = z.infer<typeof ModelProviderEnum>;
 
@@ -30,7 +31,7 @@ export type HumanReviewDecision = z.infer<typeof HumanReviewDecisionEnum>;
 
 export const ToolCallSchema = z
   .object({
-    toolName: z.string().min(1),
+    toolName: nonEmptyString,
     toolVersion: z.string().optional(),
     inputFingerprint: sha256Hex,
     outputFingerprint: sha256Hex,
@@ -43,7 +44,7 @@ export type ToolCall = z.infer<typeof ToolCallSchema>;
 
 export const HumanReviewSchema = z
   .object({
-    reviewerId: z.string().min(1),
+    reviewerId: nonEmptyString,
     reviewedAt: isoDateTime,
     decision: HumanReviewDecisionEnum,
     rationale: z.string().optional(),
@@ -54,7 +55,7 @@ export type HumanReview = z.infer<typeof HumanReviewSchema>;
 
 const PiiRedactedSchema = z
   .object({
-    fields: z.array(z.string().min(1)),
+    fields: z.array(nonEmptyString),
     pseudonymKey: z.string().optional(),
   })
   .strict();
@@ -70,25 +71,25 @@ const ModelConfigurationSchema = z
 const AuditLogEntryBase = z
   .object({
     schemaVersion: z.literal(SCHEMA_VERSION),
-    recordedBy: z.string().min(1),
+    recordedBy: nonEmptyString,
 
-    callId: z.string().min(1),
+    callId: nonEmptyString,
     parentCallId: z.string().optional(),
-    caseId: z.string().min(1),
+    caseId: nonEmptyString,
     sessionId: z.string().optional(),
-    systemId: z.string().min(1),
+    systemId: nonEmptyString,
 
     startedAt: isoDateTime,
     endedAt: isoDateTime,
     durationMs: z.number().int().nonnegative(),
 
     modelProvider: ModelProviderEnum,
-    modelName: z.string().min(1),
-    modelVersion: z.string().min(1),
+    modelName: nonEmptyString,
+    modelVersion: nonEmptyString,
     modelConfiguration: ModelConfigurationSchema,
 
-    promptTemplateId: z.string().min(1),
-    promptTemplateVersion: z.string().min(1),
+    promptTemplateId: nonEmptyString,
+    promptTemplateVersion: nonEmptyString,
     promptFingerprint: sha256Hex,
 
     inputFingerprint: sha256Hex,
@@ -99,18 +100,18 @@ const AuditLogEntryBase = z
 
     outputFingerprint: sha256Hex,
     outputDecision: z.unknown(),
-    reasonCodes: z.array(z.string().min(1)).optional(),
+    reasonCodes: z.array(nonEmptyString).optional(),
 
-    operatorId: z.string().min(1),
+    operatorId: nonEmptyString,
     humanReview: HumanReviewSchema.optional(),
 
-    riskFlags: z.array(z.string().min(1)).optional(),
+    riskFlags: z.array(nonEmptyString).optional(),
     incidentId: z.string().optional(),
 
     entryHash: sha256Hex,
     // Always set: GENESIS_PREVIOUS_HASH for the first entry, prior entryHash thereafter.
     previousEntryHash: sha256Hex,
-    signature: z.string().min(1),
+    signature: nonEmptyString,
   })
   .strict();
 
