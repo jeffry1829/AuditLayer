@@ -6,12 +6,38 @@ updates:
       interval: weekly
     open-pull-requests-limit: 10
     groups:
+      # Bundle minor + patch into one PR so the noise is bounded; each major
+      # gets its own PR so a single risky bump is reviewable in isolation.
       production-deps:
         dependency-type: production
+        update-types: [minor, patch]
       development-deps:
         dependency-type: development
+        update-types: [minor, patch]
+    ignore:
+      # Node 18 LTS support pins our TypeScript major to 5.x and @types/node
+      # to a matching major. Revisit when engines.node is raised.
+      - dependency-name: typescript
+        update-types: [version-update:semver-major]
+      - dependency-name: '@types/node'
+        update-types: [version-update:semver-major]
+      # commander 14+ drops Node 18 support; revisit with the same gate.
+      - dependency-name: commander
+        update-types: [version-update:semver-major]
+      # Zod 4 reshapes z.record() and other APIs; we'll migrate as a focused PR.
+      - dependency-name: zod
+        update-types: [version-update:semver-major]
 
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: monthly
+
+  - package-ecosystem: pip
+    directory: /python
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      python-deps:
+        update-types: [minor, patch]
