@@ -33,7 +33,9 @@ const anthropic = audit.wrap(new Anthropic(), {
   operatorId: 'system',
 });
 
-await anthropic.messages.create({ /* … */ });
+await anthropic.messages.create({
+  /* … */
+});
 ```
 
 ```python

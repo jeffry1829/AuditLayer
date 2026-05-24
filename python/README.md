@@ -112,11 +112,11 @@ audit = AuditLogger(
 | Tier | Item                                                        | Status  |
 | ---- | ----------------------------------------------------------- | ------- |
 | S1   | Conformance vector test suite (cross-language)              | Done    |
-| S2   | Python schema package (`vouchrail.schema`)                 | Done    |
+| S2   | Python schema package (`vouchrail.schema`)                  | Done    |
 | S3   | Python core SDK (`AuditLogger`, storage, signer, PII)       | Done    |
 | S4   | Python wrap for Anthropic (sync + async)                    | Done    |
 | S5   | Python wrap for OpenAI (sync + async)                       | Done    |
-| S6   | Python CLI parity (`vouchrail init/query/verify/export`)   | Done    |
+| S6   | Python CLI parity (`vouchrail init/query/verify/export`)    | Done    |
 | S7   | Python examples (resume-screening; credit + triage planned) | Partial |
 | —    | `audit.case(...)` context manager                           | Done    |
 | —    | `@audit.track(...)` decorator                               | Done    |

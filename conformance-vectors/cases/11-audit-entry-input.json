@@ -25,9 +25,7 @@
     "outputDecision": {
       "ok": true
     },
-    "reasonCodes": [
-      "OK"
-    ],
+    "reasonCodes": ["OK"],
     "operatorId": "op-1"
   },
   "canonical": "{\"callId\":\"00000000-0000-4000-8000-000000000001\",\"caseId\":\"case-conformance\",\"durationMs\":250,\"endedAt\":\"2026-05-20T12:00:00.250Z\",\"inputFingerprint\":\"0000000000000000000000000000000000000000000000000000000000000002\",\"modelConfiguration\":{\"maxTokens\":256,\"temperature\":0.1},\"modelName\":\"claude-3-5-sonnet-20241022\",\"modelProvider\":\"anthropic\",\"modelVersion\":\"20241022\",\"operatorId\":\"op-1\",\"outputDecision\":{\"ok\":true},\"outputFingerprint\":\"0000000000000000000000000000000000000000000000000000000000000003\",\"promptFingerprint\":\"0000000000000000000000000000000000000000000000000000000000000001\",\"promptTemplateId\":\"tmpl-1\",\"promptTemplateVersion\":\"1.0.0\",\"reasonCodes\":[\"OK\"],\"recordedBy\":\"@vouchrail/sdk@0.1.0\",\"schemaVersion\":\"vouchrail-v1.0\",\"startedAt\":\"2026-05-20T12:00:00.000Z\",\"systemId\":\"sys-conformance\"}",

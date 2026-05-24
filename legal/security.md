@@ -26,7 +26,7 @@
 | ----------------------------------------------------------------- | ------------------------------ |
 | TypeScript strict mode for SDK + Schema                           | Required                       |
 | Runtime input validation with Zod                                 | Required for audit log entries |
-| No `eval`, `Function()`, dynamic require in `@vouchrail/sdk`     | Required (CONTRIBUTING)        |
+| No `eval`, `Function()`, dynamic require in `@vouchrail/sdk`      | Required (CONTRIBUTING)        |
 | Dependency review on every PR (npm audit, dependabot)             | Configured                     |
 | Reproducible builds (lockfile committed; CI uses frozen-lockfile) | Configured                     |
 | Tamper-test in `packages/sdk/tests/`                              | Required                       |
