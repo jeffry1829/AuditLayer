@@ -199,6 +199,87 @@ def test_wrap_anthropic_mock_records_entry(tmp_audit_dir: str) -> None:
     audit.close()
 
 
+def test_wrap_openai_mock_records_entry(tmp_audit_dir: str) -> None:
+    audit = _make_logger(tmp_audit_dir)
+
+    class _Completions:
+        def create(self, **params):
+            return {
+                "id": "cmpl_xyz",
+                "model": params.get("model"),
+                "choices": [
+                    {
+                        "index": 0,
+                        "message": {"role": "assistant", "content": "ok"},
+                        "finish_reason": "stop",
+                    },
+                ],
+                "usage": {"prompt_tokens": 10, "completion_tokens": 1},
+            }
+
+    class _Chat:
+        completions = _Completions()
+
+    class _Client:
+        chat = _Chat()
+
+    client = _Client()
+    audit.wrap(
+        client,
+        WrapContext(
+            case_id="case-oai",
+            prompt_template_id="tpl-o",
+            prompt_template_version="1.0",
+            operator_id="op",
+        ),
+    )
+    resp = client.chat.completions.create(
+        model="gpt-4o",
+        messages=[{"role": "user", "content": "hi"}],
+        temperature=0.4,
+    )
+    assert resp["id"] == "cmpl_xyz"
+    entries = list(audit.list())
+    assert len(entries) == 1
+    assert entries[0]["modelProvider"] == "openai"
+    assert entries[0]["modelConfiguration"] == {"temperature": 0.4}
+    audit.close()
+
+
+def test_wrap_openai_records_risk_flag_on_error(tmp_audit_dir: str) -> None:
+    audit = _make_logger(tmp_audit_dir)
+
+    class _Completions:
+        def create(self, **_params):
+            raise RuntimeError("boom")
+
+    class _Chat:
+        completions = _Completions()
+
+    class _Client:
+        chat = _Chat()
+
+    client = _Client()
+    audit.wrap(
+        client,
+        WrapContext(
+            case_id="case-oai-fail",
+            prompt_template_id="tpl",
+            prompt_template_version="1.0",
+            operator_id="op",
+        ),
+    )
+    with pytest.raises(RuntimeError, match="boom"):
+        client.chat.completions.create(
+            model="gpt-4o",
+            messages=[{"role": "user", "content": "x"}],
+        )
+    entries = list(audit.list())
+    assert len(entries) == 1
+    assert "provider_error" in (entries[0].get("riskFlags") or [])
+    audit.close()
+
+
 def test_custom_provider_registration(tmp_audit_dir: str) -> None:
     audit = _make_logger(tmp_audit_dir)
 

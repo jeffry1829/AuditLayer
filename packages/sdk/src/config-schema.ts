@@ -74,12 +74,32 @@ export const PiiTokenStoreConfigSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('sqlite'), path: z.string().min(1) }).strict(),
 ]);
 
+/**
+ * In code, `customPatterns` is `Record<string, RegExp>`. In a JSON config
+ * file the values must be strings; we compile them to RegExp at parse time
+ * with the `g` flag so the detectPii loop can iterate matches. Callers who
+ * need non-global semantics build the RegExp themselves and pass it through
+ * the programmatic API.
+ *
+ * Pattern strings are NOT validated for ReDoS safety — `PiiRedactionConfig`
+ * documents that custom patterns are the caller's responsibility.
+ */
+const customPatternsSchema = z
+  .record(z.string(), z.union([z.instanceof(RegExp), z.string()]))
+  .transform((rec) => {
+    const out: Record<string, RegExp> = {};
+    for (const [name, val] of Object.entries(rec)) {
+      out[name] = val instanceof RegExp ? val : new RegExp(val, 'g');
+    }
+    return out;
+  });
+
 export const PiiRedactionConfigSchema = z
   .object({
     enabled: z.boolean(),
     strategy: z.enum(['pseudonymize', 'hash', 'remove']),
     patterns: z.record(piiPatternEnum, z.boolean()).optional(),
-    customPatterns: z.record(z.string(), z.instanceof(RegExp)).optional(),
+    customPatterns: customPatternsSchema.optional(),
     tokenStore: PiiTokenStoreConfigSchema.optional(),
   })
   .strict();

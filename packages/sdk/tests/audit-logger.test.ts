@@ -264,6 +264,76 @@ describe('AuditLogger', () => {
     await audit.close();
   });
 
+  it('outputDecision wins over output and outputFingerprint covers the same value', async () => {
+    // Pre-fix bug: fingerprint used output ?? outputDecision but the stored
+    // field used outputDecision ?? output. When both were set the two
+    // disagreed and a regulator could not re-hash the stored decision to the
+    // recorded fingerprint. Pin the fix.
+    const audit = makeLogger(dir);
+    const callId = await audit.startCall({
+      caseId: 'case-precedence',
+      modelProvider: 'anthropic',
+      modelName: 'claude-3-5-sonnet',
+      modelVersion: '20241022',
+      promptTemplateId: 'tpl',
+      promptTemplateVersion: '1.0.0',
+      operatorId: 'op',
+    });
+    const entry = await audit.endCall(callId, {
+      output: { raw: 'noise' },
+      outputDecision: { score: 7.5, recommended: true },
+    });
+    expect(entry.outputDecision).toEqual({ score: 7.5, recommended: true });
+    const { canonicalize } = await import('@vouchrail/schema');
+    const { createHash } = await import('node:crypto');
+    const expected = createHash('sha256')
+      .update(canonicalize(entry.outputDecision ?? null), 'utf8')
+      .digest('hex');
+    expect(entry.outputFingerprint).toBe(expected);
+    await audit.close();
+  });
+
+  it('rejects double endCall on the same callId', async () => {
+    const audit = makeLogger(dir);
+    const callId = await audit.startCall({
+      caseId: 'case-double',
+      modelProvider: 'anthropic',
+      modelName: 'm',
+      modelVersion: 'v',
+      promptTemplateId: 't',
+      promptTemplateVersion: '1.0',
+      operatorId: 'op',
+    });
+    await audit.endCall(callId, { output: 1 });
+    await expect(audit.endCall(callId, { output: 2 })).rejects.toThrow(/not in the pending set/);
+    await audit.close();
+  });
+
+  it('serializes concurrent endCalls so the chain stays linear', async () => {
+    const audit = makeLogger(dir);
+    const ids = await Promise.all(
+      Array.from({ length: 8 }, (_v, i) =>
+        audit.startCall({
+          caseId: `case-${i}`,
+          modelProvider: 'anthropic',
+          modelName: 'm',
+          modelVersion: 'v',
+          promptTemplateId: 't',
+          promptTemplateVersion: '1.0',
+          operatorId: 'op',
+          input: { i },
+        }),
+      ),
+    );
+    const entries = await Promise.all(ids.map((id, i) => audit.endCall(id, { output: { i } })));
+    // Sort by startedAt so we can verify the chain order.
+    entries.sort((a, b) => (a.startedAt === b.startedAt ? 0 : a.startedAt < b.startedAt ? -1 : 1));
+    const persisted = await collectAll(audit.backend as LocalStorageBackend, 'sys-test');
+    expect(persisted).toHaveLength(8);
+    expect(verifyChain(persisted).valid).toBe(true);
+    await audit.close();
+  });
+
   it('wrap() logs failed Anthropic calls with provider_error risk flag', async () => {
     const audit = makeLogger(dir);
     const mockAnthropic = {

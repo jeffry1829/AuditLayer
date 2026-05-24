@@ -124,4 +124,32 @@ describe('PiiRedactionConfigSchema', () => {
     });
     expect(r.success).toBe(true);
   });
+
+  it('compiles customPatterns strings into global RegExp', () => {
+    const r = PiiRedactionConfigSchema.safeParse({
+      enabled: true,
+      strategy: 'hash',
+      customPatterns: { ticket: 'TICKET-\\d+' },
+    });
+    expect(r.success).toBe(true);
+    if (r.success) {
+      const re = r.data.customPatterns!['ticket'];
+      expect(re).toBeInstanceOf(RegExp);
+      expect(re!.flags).toContain('g');
+      expect(re!.source).toBe('TICKET-\\d+');
+    }
+  });
+
+  it('accepts pre-built RegExp values in customPatterns alongside strings', () => {
+    const r = PiiRedactionConfigSchema.safeParse({
+      enabled: true,
+      strategy: 'hash',
+      customPatterns: { rx: /CASE-\d+/g, str: '\\bORD-\\d+\\b' },
+    });
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.customPatterns!['rx']).toBeInstanceOf(RegExp);
+      expect(r.data.customPatterns!['str']).toBeInstanceOf(RegExp);
+    }
+  });
 });

@@ -10,7 +10,6 @@ from pathlib import Path
 from typing import Any, Literal
 
 from ..defaults import STORAGE_DEFAULTS
-from ..errors import ERROR_CODES
 from ..util import assert_safe_path_segment
 from .base import AppendOptions, QueryOptions, StorageBackend
 
@@ -85,7 +84,3 @@ class LocalStorageBackend(StorageBackend):
             / f"{when.day:02d}"
             / name
         )
-
-
-# Silence the "unused import" linter for the ERROR_CODES re-export point.
-_ = ERROR_CODES

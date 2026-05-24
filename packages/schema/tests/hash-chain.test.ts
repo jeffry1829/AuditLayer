@@ -78,8 +78,7 @@ describe('hash-chain', () => {
     const linked = linkEntry(input, null);
     // computeEntryHash hashes everything except entryHash + signature; strip
     // the populated entryHash before re-hashing.
-    const { entryHash: _eh, ...hashable } = linked;
-    void _eh;
+    const { entryHash: _entryHash, ...hashable } = linked;
     const reorder = {
       ...hashable,
       modelConfiguration: { maxTokens: 256, temperature: 0.2 },
@@ -137,9 +136,7 @@ describe('hash-chain', () => {
     // sentinel. Recompute entryHash so the entry-hash check passes and the
     // verifier reports the genesis-link mismatch specifically.
     const tampered = { ...chain[0]!, previousEntryHash: 'd'.repeat(64) };
-    const { entryHash: _eh, signature: _sig, ...hashable } = tampered;
-    void _eh;
-    void _sig;
+    const { entryHash: _entryHash, signature: _signature, ...hashable } = tampered;
     const recomputed = computeEntryHash(hashable);
     chain[0] = { ...tampered, entryHash: recomputed };
     const result = verifyChain(chain);
