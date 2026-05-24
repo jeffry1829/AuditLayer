@@ -27,6 +27,14 @@ updates:
       # Zod 4 reshapes z.record() and other APIs; we'll migrate as a focused PR.
       - dependency-name: zod
         update-types: [version-update:semver-major]
+      # ESLint 9+ requires flat config (eslint.config.js); migration is a
+      # focused PR. Pin the major until the flat-config rewrite lands.
+      - dependency-name: eslint
+        update-types: [version-update:semver-major]
+      - dependency-name: '@typescript-eslint/eslint-plugin'
+        update-types: [version-update:semver-major]
+      - dependency-name: '@typescript-eslint/parser'
+        update-types: [version-update:semver-major]
 
   - package-ecosystem: github-actions
     directory: /
